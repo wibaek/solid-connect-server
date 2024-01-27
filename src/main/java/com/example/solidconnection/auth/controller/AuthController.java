@@ -3,6 +3,7 @@ package com.example.solidconnection.auth.controller;
 import com.example.solidconnection.auth.dto.KakaoCodeDto;
 import com.example.solidconnection.auth.dto.KakaoOauthResponseDto;
 import com.example.solidconnection.auth.service.KakaoOAuthService;
+import com.example.solidconnection.custom.exception.CustomException;
 import com.example.solidconnection.custom.response.CustomResponse;
 import com.example.solidconnection.custom.response.DataResponse;
 import lombok.RequiredArgsConstructor;
@@ -18,7 +19,7 @@ public class AuthController {
     private final KakaoOAuthService kakaoOAuthService;
 
     @PostMapping("/kakao")
-    public CustomResponse kakaoOauth(@RequestBody KakaoCodeDto kakaoCodeDto) {
+    public CustomResponse kakaoOauth(@RequestBody KakaoCodeDto kakaoCodeDto) throws CustomException {
         KakaoOauthResponseDto kakaoOauthResponseDto = kakaoOAuthService.processOauth(kakaoCodeDto.getCode());
         return new DataResponse<>(kakaoOauthResponseDto);
     }

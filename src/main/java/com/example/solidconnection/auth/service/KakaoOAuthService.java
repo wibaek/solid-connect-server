@@ -12,6 +12,8 @@ import org.springframework.stereotype.Service;
 import org.springframework.web.client.RestTemplate;
 import org.springframework.web.util.UriComponentsBuilder;
 
+import java.util.Objects;
+
 import static com.example.solidconnection.custom.exception.ErrorCode.*;
 
 @Service
@@ -31,7 +33,7 @@ public class KakaoOAuthService {
     @Value("${kakao.user_info_url}")
     private String userInfoUrl;
 
-    public KakaoOauthResponseDto processOauth(String code) {
+    public KakaoOauthResponseDto processOauth(String code) throws CustomException {
         String kakaoAccessToken = getKakaoAccessToken(code);
         KakaoUserInfoDto kakaoUserInfoDto = getKakaoUserInfo(kakaoAccessToken);
         String email = kakaoUserInfoDto.getKakaoAccount().getEmail();
@@ -45,18 +47,16 @@ public class KakaoOAuthService {
 
     private String getKakaoAccessToken(String code) {
         // 카카오 엑세스 토큰 요청
-        ResponseEntity<KakaoTokenDto> response = restTemplate.exchange(
-                buildTokenUri(code),
-                HttpMethod.POST,
-                null,
-                KakaoTokenDto.class
-        );
-
-        // 응답 예외처리
-        if (response.getStatusCode() == HttpStatus.OK && response.getBody() != null) {
-            return response.getBody().getAccessToken();
-        } else {
-            throw new CustomException(KAKAO_ACCESS_TOKEN_FAIL);
+        try {
+            ResponseEntity<KakaoTokenDto> response = restTemplate.exchange(
+                    buildTokenUri(code),
+                    HttpMethod.POST,
+                    null,
+                    KakaoTokenDto.class
+            );
+            return Objects.requireNonNull(response.getBody()).getAccessToken();
+        } catch (Exception e){
+            throw new CustomException(KAKAO_AUTH_CODE_FAIL);
         }
     }
 
@@ -93,9 +93,6 @@ public class KakaoOAuthService {
     }
 
     private SignInResponseDto kakaoSignIn(String email) {
-        siteUserRepository.findByEmail(email)
-                .orElseThrow(() -> new CustomException(EMAIL_NOT_FOUND));
-
         var accessToken = tokenService.generateToken(email, TokenType.ACCESS);
         var refreshToken = tokenService.saveToken(email, TokenType.REFRESH);
         return SignInResponseDto.builder()
