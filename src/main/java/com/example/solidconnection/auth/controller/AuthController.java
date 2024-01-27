@@ -14,6 +14,8 @@ import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RestController;
 
+import java.security.Principal;
+
 @RestController
 @RequestMapping("auth")
 @RequiredArgsConstructor
@@ -30,6 +32,12 @@ public class AuthController {
     @PostMapping("/sign-up")
     public CustomResponse signUp(@RequestBody SignUpRequestDto signUpRequestDto) {
         boolean status = authService.signUp(signUpRequestDto);
+        return new StatusResponse(status);
+    }
+
+    @PostMapping("/sign-out")
+    public CustomResponse signOut(Principal principal) {
+        boolean status = authService.signOut(principal.getName());
         return new StatusResponse(status);
     }
 }

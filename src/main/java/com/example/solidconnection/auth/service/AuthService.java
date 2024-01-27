@@ -3,6 +3,7 @@ package com.example.solidconnection.auth.service;
 
 import com.example.solidconnection.auth.dto.SignUpRequestDto;
 import com.example.solidconnection.config.token.TokenService;
+import com.example.solidconnection.config.token.TokenType;
 import com.example.solidconnection.config.token.TokenValidator;
 import com.example.solidconnection.country.CountryRepository;
 import com.example.solidconnection.country.InterestedCountyRepository;
@@ -15,12 +16,14 @@ import com.example.solidconnection.type.CountryCode;
 import com.example.solidconnection.type.RegionCode;
 import com.example.solidconnection.type.Role;
 import lombok.RequiredArgsConstructor;
+import org.springframework.data.redis.core.RedisTemplate;
 import org.springframework.stereotype.Service;
 
 import java.time.LocalDate;
 import java.time.format.DateTimeFormatter;
 import java.time.format.DateTimeParseException;
 import java.util.List;
+import java.util.concurrent.TimeUnit;
 import java.util.stream.Collectors;
 
 import static com.example.solidconnection.custom.exception.ErrorCode.*;
@@ -28,6 +31,8 @@ import static com.example.solidconnection.custom.exception.ErrorCode.*;
 @Service
 @RequiredArgsConstructor
 public class AuthService {
+
+    private final RedisTemplate<String, String> redisTemplate;
     private final TokenValidator tokenValidator;
     private final TokenService tokenService;
     private final SiteUserRepository siteUserRepository;
@@ -47,6 +52,16 @@ public class AuthService {
 
         saveInterestedRegion(signUpRequestDto, savedSiteUser);
         saveInterestedCountry(signUpRequestDto, savedSiteUser);
+        return true;
+    }
+
+    public boolean signOut(String email){
+        redisTemplate.opsForValue().set(
+                TokenType.REFRESH.getPrefix() + email,
+                "signOut",
+                TokenType.REFRESH.getExpireTime(),
+                TimeUnit.MILLISECONDS
+        );
         return true;
     }
 
@@ -113,5 +128,4 @@ public class AuthService {
                 .collect(Collectors.toList());
         interestedRegionRepository.saveAll(interestedRegions);
     }
-
 }
