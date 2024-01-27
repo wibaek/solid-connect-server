@@ -64,7 +64,9 @@ public class JwtAuthenticationFilter extends OncePerRequestFilter {
         var permitAllEndpoints = new HashSet<String>();
 
         // 서버 정상 작동 확인
-        permitAllEndpoints.add("");
+        permitAllEndpoints.add("/");
+        permitAllEndpoints.add("/index.html");
+        permitAllEndpoints.add("/favicon.ico");
 
         // 이미지 업로드
         permitAllEndpoints.add("/img-upload/profile");
