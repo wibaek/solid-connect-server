@@ -1,4 +1,4 @@
-package com.example.solidconnection.config.security;
+package com.example.solidconnection.config.token;
 
 import lombok.Getter;
 

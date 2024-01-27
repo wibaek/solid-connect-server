@@ -47,6 +47,7 @@ public class SecurityConfiguration {
                 .authorizeHttpRequests(authorizeRequest
                         -> authorizeRequest
                         .requestMatchers(
+                                "",
                                 "/img-upload/profile", "/img-upload/gpa", "/img-upload/language",
                                 "/auth/kakao",  "/auth/sign-up")
                         .permitAll()

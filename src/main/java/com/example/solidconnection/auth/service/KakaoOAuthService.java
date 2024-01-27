@@ -1,8 +1,8 @@
 package com.example.solidconnection.auth.service;
 
 import com.example.solidconnection.auth.dto.*;
-import com.example.solidconnection.config.security.TokenProvider;
-import com.example.solidconnection.config.security.TokenType;
+import com.example.solidconnection.config.token.TokenService;
+import com.example.solidconnection.config.token.TokenType;
 import com.example.solidconnection.custom.exception.CustomException;
 import com.example.solidconnection.siteuser.repository.SiteUserRepository;
 import lombok.RequiredArgsConstructor;
@@ -19,7 +19,7 @@ import static com.example.solidconnection.custom.exception.ErrorCode.*;
 public class KakaoOAuthService {
 
     private final RestTemplate restTemplate;
-    private final TokenProvider tokenProvider;
+    private final TokenService tokenService;
     private final SiteUserRepository siteUserRepository;
 
     @Value("${kakao.client_id}")
@@ -39,7 +39,7 @@ public class KakaoOAuthService {
         if (isAlreadyRegistered) {
             return kakaoSignIn(email);
         }
-        String kakaoOauthToken = tokenProvider.generateToken(email, TokenType.KAKAO_OAUTH);
+        String kakaoOauthToken = tokenService.generateToken(email, TokenType.KAKAO_OAUTH);
         return FirstAccessResponseDto.fromKakaoUserInfo(kakaoUserInfoDto, kakaoOauthToken);
     }
 
@@ -96,8 +96,8 @@ public class KakaoOAuthService {
         siteUserRepository.findByEmail(email)
                 .orElseThrow(() -> new CustomException(EMAIL_NOT_FOUND));
 
-        var accessToken = tokenProvider.generateToken(email, TokenType.ACCESS);
-        var refreshToken = tokenProvider.saveToken(email, TokenType.REFRESH);
+        var accessToken = tokenService.generateToken(email, TokenType.ACCESS);
+        var refreshToken = tokenService.saveToken(email, TokenType.REFRESH);
         return SignInResponseDto.builder()
                 .registered(true)
                 .accessToken(accessToken)
