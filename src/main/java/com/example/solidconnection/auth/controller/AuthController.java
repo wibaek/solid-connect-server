@@ -1,6 +1,7 @@
 package com.example.solidconnection.auth.controller;
 
 import com.example.solidconnection.auth.dto.SignUpRequestDto;
+import com.example.solidconnection.auth.dto.SignUpResponseDto;
 import com.example.solidconnection.auth.dto.kakao.KakaoCodeDto;
 import com.example.solidconnection.auth.dto.kakao.KakaoOauthResponseDto;
 import com.example.solidconnection.auth.service.AuthService;
@@ -9,10 +10,7 @@ import com.example.solidconnection.custom.response.CustomResponse;
 import com.example.solidconnection.custom.response.DataResponse;
 import com.example.solidconnection.custom.response.StatusResponse;
 import lombok.RequiredArgsConstructor;
-import org.springframework.web.bind.annotation.PostMapping;
-import org.springframework.web.bind.annotation.RequestBody;
-import org.springframework.web.bind.annotation.RequestMapping;
-import org.springframework.web.bind.annotation.RestController;
+import org.springframework.web.bind.annotation.*;
 
 import java.security.Principal;
 
@@ -31,13 +29,19 @@ public class AuthController {
 
     @PostMapping("/sign-up")
     public CustomResponse signUp(@RequestBody SignUpRequestDto signUpRequestDto) {
-        boolean status = authService.signUp(signUpRequestDto);
-        return new StatusResponse(status);
+        SignUpResponseDto signUpResponseDto = authService.signUp(signUpRequestDto);
+        return new DataResponse<>(signUpResponseDto);
     }
 
     @PostMapping("/sign-out")
     public CustomResponse signOut(Principal principal) {
         boolean status = authService.signOut(principal.getName());
+        return new StatusResponse(status);
+    }
+
+    @PatchMapping("/quit")
+    public CustomResponse quit(Principal principal) {
+        boolean status = authService.quit(principal.getName());
         return new StatusResponse(status);
     }
 }

@@ -1,4 +1,4 @@
-package com.example.solidconnection.country;
+package com.example.solidconnection.repositories;
 
 import com.example.solidconnection.entity.InterestedCountry;
 import org.springframework.data.jpa.repository.JpaRepository;

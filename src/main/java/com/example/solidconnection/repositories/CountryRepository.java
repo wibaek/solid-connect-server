@@ -1,4 +1,4 @@
-package com.example.solidconnection.country;
+package com.example.solidconnection.repositories;
 
 import com.example.solidconnection.entity.Country;
 import com.example.solidconnection.type.CountryCode;
