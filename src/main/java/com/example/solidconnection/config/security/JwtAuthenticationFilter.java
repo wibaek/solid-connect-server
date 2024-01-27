@@ -2,6 +2,7 @@ package com.example.solidconnection.config.security;
 
 import com.example.solidconnection.config.token.TokenService;
 import com.example.solidconnection.config.token.TokenValidator;
+import com.example.solidconnection.custom.exception.CustomException;
 import jakarta.servlet.FilterChain;
 import jakarta.servlet.ServletException;
 import jakarta.servlet.http.HttpServletRequest;
@@ -48,6 +49,8 @@ public class JwtAuthenticationFilter extends OncePerRequestFilter {
             filterChain.doFilter(request, response); // 다음 필터로 요청과 응답 전달
         } catch (AuthenticationException e) {
             jwtAuthenticationEntryPoint.commence(request, response, e);
+        } catch (CustomException e){
+            jwtAuthenticationEntryPoint.customCommence(request, response, e);
         }
     }
 

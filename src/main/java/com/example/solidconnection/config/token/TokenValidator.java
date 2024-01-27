@@ -25,14 +25,21 @@ public class TokenValidator {
     public void validateAccessToken(String token) {
         validateTokenNotEmpty(token);
         validateTokenNotExpired(token, TokenType.ACCESS);
+        validateNotSignOut(token);
         validateRefreshToken(token);
-        // TODO : validateNotLogOut 함수 생성 및 추가
     }
 
     private void validateRefreshToken(String token) {
         String email = getClaim(token).getSubject();
-        if (redisTemplate.opsForValue().get(TokenType.REFRESH.getPrefix() + email) != null) {
+        if (redisTemplate.opsForValue().get(TokenType.REFRESH.getPrefix() + email) == null) {
             throw new CustomException(REFRESH_TOKEN_EXPIRED);
+        }
+    }
+
+    private void validateNotSignOut(String token) {
+        String email = getClaim(token).getSubject();
+        if ("signOut".equals(redisTemplate.opsForValue().get(TokenType.REFRESH.getPrefix() + email))) {
+            throw new CustomException(USER_ALREADY_SIGN_OUT);
         }
     }
 

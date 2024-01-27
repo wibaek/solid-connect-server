@@ -1,6 +1,6 @@
 package com.example.solidconnection.config.token;
 
-import com.example.solidconnection.custom.exception.CustomException;
+import com.example.solidconnection.custom.userdetails.CustomUserDetailsService;
 import com.example.solidconnection.siteuser.repository.SiteUserRepository;
 import io.jsonwebtoken.Claims;
 import io.jsonwebtoken.Jwts;
@@ -16,13 +16,12 @@ import org.springframework.stereotype.Component;
 import java.util.Date;
 import java.util.concurrent.TimeUnit;
 
-import static com.example.solidconnection.custom.exception.ErrorCode.EMAIL_NOT_FOUND;
-
 @Component
 @RequiredArgsConstructor
 public class TokenService {
     private final RedisTemplate<String, String> redisTemplate;
     private final SiteUserRepository siteUserRepository;
+    private final CustomUserDetailsService customUserDetailsService;
 
     @Value("${jwt.secret}")
     private String secretKey;
@@ -50,8 +49,7 @@ public class TokenService {
 
     public Authentication getAuthentication(String token) {
         String email = getClaim(token).getSubject();
-        UserDetails userDetails = (UserDetails) siteUserRepository.findByEmail(email)
-                .orElseThrow(() -> new CustomException(EMAIL_NOT_FOUND));
+        UserDetails userDetails = customUserDetailsService.loadUserByUsername(email);
         return new UsernamePasswordAuthenticationToken(userDetails, "", userDetails.getAuthorities());
     }
 
