@@ -18,8 +18,9 @@ public class AuthController {
     private final KakaoOAuthService kakaoOAuthService;
 
     @PostMapping("/kakao")
-    public CustomResponse signUp(@RequestBody KakaoCodeDto kakaoCodeDto) {
+    public CustomResponse kakaoOauth(@RequestBody KakaoCodeDto kakaoCodeDto) {
         KakaoOauthResponseDto kakaoOauthResponseDto = kakaoOAuthService.processOauth(kakaoCodeDto.getCode());
         return new DataResponse<>(kakaoOauthResponseDto);
     }
+
 }
