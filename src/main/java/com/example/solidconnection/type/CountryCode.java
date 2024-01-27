@@ -1,33 +1,40 @@
 package com.example.solidconnection.type;
 
+import com.example.solidconnection.custom.exception.CustomException;
+
+import java.util.Arrays;
+import java.util.Optional;
+
+import static com.example.solidconnection.custom.exception.ErrorCode.INVALID_COUNTRY_NAME;
+
 public enum CountryCode {
-    BRUNEI("브루나이"),
-    SINGAPORE("싱가포르"),
-    AZERBAIJAN("아제르바이잔"),
-    INDONESIA("인도네시아"),
-    JAPAN("일본"),
-    TURKEY("튀르키예"),
-    HONG_KONG("홍콩"),
-    UNITED_STATES("미국"),
-    CANADA("캐나다"),
-    AUSTRALIA("호주"),
-    BRAZIL("브라질"),
-    NETHERLANDS("네덜란드"),
-    NORWAY("노르웨이"),
-    DENMARK("덴마크"),
-    GERMANY("독일"),
-    SWEDEN("스웨덴"),
-    SWITZERLAND("스위스"),
-    SPAIN("스페인"),
-    UNITED_KINGDOM("영국"),
-    AUSTRIA("오스트리아"),
-    ITALY("이탈리아"),
-    CZECH_REPUBLIC("체코"),
-    PORTUGAL("포르투갈"),
-    FRANCE("프랑스"),
-    FINLAND("핀란드"),
-    CHINA("중국"),
-    TAIWAN("대만");
+    BN("브루나이"),
+    SG("싱가포르"),
+    AZ("아제르바이잔"),
+    ID("인도네시아"),
+    JP("일본"),
+    TR("튀르키예"),
+    HK("홍콩"),
+    US("미국"),
+    CA("캐나다"),
+    AU("호주"),
+    BR("브라질"),
+    NL("네덜란드"),
+    NO("노르웨이"),
+    DK("덴마크"),
+    DE("독일"),
+    SE("스웨덴"),
+    CH("스위스"),
+    ES("스페인"),
+    GB("영국"),
+    AT("오스트리아"),
+    IT("이탈리아"),
+    CZ("체코"),
+    PT("포르투갈"),
+    FR("프랑스"),
+    FI("핀란드"),
+    CN("중국"),
+    TW("대만");
 
     private final String koreanName;
 
@@ -36,12 +43,10 @@ public enum CountryCode {
     }
 
     public static CountryCode getCountryCodeByKoreanName(String koreanName) {
-        for (CountryCode countryCode : CountryCode.values()) {
-            if (countryCode.getKoreanName().equals(koreanName)) {
-                return countryCode;
-            }
-        }
-        throw new IllegalArgumentException("No country found with Korean name: " + koreanName); //TODO: 에러 타입 정리 필요
+        Optional<CountryCode> matchingCountryCode = Arrays.stream(CountryCode.values())
+                .filter(countryCode -> countryCode.getKoreanName().equals(koreanName))
+                .findFirst();
+        return matchingCountryCode.orElseThrow(() -> new CustomException(INVALID_COUNTRY_NAME, koreanName));
     }
 
     public String getKoreanName() {

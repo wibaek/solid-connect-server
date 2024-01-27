@@ -1,8 +1,16 @@
 package com.example.solidconnection.entity;
 
 import jakarta.persistence.*;
+import lombok.AllArgsConstructor;
+import lombok.Builder;
+import lombok.Getter;
+import lombok.NoArgsConstructor;
 
 @Entity
+@Builder
+@NoArgsConstructor
+@AllArgsConstructor
+@Getter
 public class InterestedCountry {
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
@@ -14,10 +22,6 @@ public class InterestedCountry {
     private SiteUser siteUser;
 
     @ManyToOne
-    @JoinColumn(name = "country_id")
+    @JoinColumn(name = "country_code")
     private Country country;
-
-    @ManyToOne
-    @JoinColumn(name = "region_id")
-    private Region region;
 }

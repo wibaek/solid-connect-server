@@ -1,13 +1,22 @@
 package com.example.solidconnection.entity;
 
+import com.example.solidconnection.type.Gender;
 import com.example.solidconnection.type.PreparationStatus;
 import com.example.solidconnection.type.Role;
 import jakarta.persistence.*;
+import lombok.AllArgsConstructor;
+import lombok.Builder;
+import lombok.Getter;
+import lombok.NoArgsConstructor;
 
 import java.time.LocalDateTime;
 import java.util.Set;
 
 @Entity
+@Builder
+@NoArgsConstructor
+@AllArgsConstructor
+@Getter
 public class SiteUser {
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
@@ -19,20 +28,27 @@ public class SiteUser {
     @Column(nullable = false, length = 100)
     private String nickname;
 
+    @Column(length = 500)
+    private String profileImageUrl;
+
+    @Column(nullable = false, length = 20)
+    private String birth;
+
     @Column(nullable = false, length = 50)
     @Enumerated(EnumType.STRING)
     private PreparationStatus preparationStage;
 
-    @Column(length = 500)
-    private String profileImageUrl;
+    @Column(nullable = false, length = 50)
+    @Enumerated(EnumType.STRING)
+    private Role role;
+
+    @Column(nullable = false, length = 20)
+    @Enumerated(EnumType.STRING)
+    private Gender gender;
 
     private LocalDateTime nicknameModifiedAt;
 
     private LocalDateTime quitedAt;
-
-    @Column(nullable = false, length = 50)
-    @Enumerated(EnumType.STRING)
-    private Role role;
 
     // 연관관계
     @OneToMany(mappedBy = "siteUser")
@@ -46,4 +62,5 @@ public class SiteUser {
 
     @OneToMany(mappedBy = "siteUser")
     private Set<WishUniversity> wishUniversities;
+
 }

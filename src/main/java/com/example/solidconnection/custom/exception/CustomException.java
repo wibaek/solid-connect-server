@@ -8,13 +8,12 @@ public class CustomException extends RuntimeException {
     private final String message;
 
     public CustomException(ErrorCode errorCode){
-        super(errorCode.getMessage());
         code = errorCode.getCode();
         message = errorCode.getMessage();
     }
 
     public CustomException(ErrorCode errorCode, String detail){
         code = errorCode.getCode();
-        message = errorCode.getMessage() + detail;
+        message = errorCode.getMessage() + " : " + detail;
     }
 }

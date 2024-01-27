@@ -1,6 +1,5 @@
 package com.example.solidconnection.config.security;
 
-import com.example.solidconnection.custom.exception.CustomException;
 import com.example.solidconnection.custom.response.ErrorResponse;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import jakarta.servlet.http.HttpServletRequest;
@@ -23,7 +22,7 @@ public class JwtAuthenticationEntryPoint implements AuthenticationEntryPoint {
     @Override
     public void commence(HttpServletRequest request, HttpServletResponse response,
                          AuthenticationException authException) throws IOException {
-        ErrorResponse errorResponse = new ErrorResponse(new CustomException(AUTHENTICATION_FAILED, authException.getMessage()));
+        ErrorResponse errorResponse = new ErrorResponse(AUTHENTICATION_FAILED, authException.getMessage());
         response.setStatus(HttpServletResponse.SC_UNAUTHORIZED);
         response.setContentType("application/json");
         response.setCharacterEncoding("UTF-8");

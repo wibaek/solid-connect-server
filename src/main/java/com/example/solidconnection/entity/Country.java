@@ -12,12 +12,9 @@ public class Country {
     @Enumerated(EnumType.STRING)
     private CountryCode countryCode;
 
-    @Column(nullable = false, length = 100)
-    private String name;
-
     // 연관 관계
     @ManyToOne
-    @JoinColumn(name = "region_id")
+    @JoinColumn(name = "region_code")
     private Region region;
 
     @OneToMany(mappedBy = "country")

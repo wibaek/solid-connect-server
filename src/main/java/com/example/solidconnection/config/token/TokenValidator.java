@@ -10,6 +10,7 @@ import org.springframework.stereotype.Component;
 import org.springframework.util.StringUtils;
 
 import java.util.Date;
+import java.util.Objects;
 
 import static com.example.solidconnection.custom.exception.ErrorCode.*;
 
@@ -23,7 +24,7 @@ public class TokenValidator {
 
     public void validateAccessToken(String token) {
         validateTokenNotEmpty(token);
-        validateAccessTokenNotExpired(token);
+        validateTokenNotExpired(token, TokenType.ACCESS);
         validateRefreshToken(token);
         // TODO : validateNotLogOut 함수 생성 및 추가
     }
@@ -35,11 +36,29 @@ public class TokenValidator {
         }
     }
 
-    private void validateAccessTokenNotExpired(String token) {
+    public void validateKakaoToken(String token) {
+        validateTokenNotEmpty(token);
+        validateTokenNotExpired(token, TokenType.KAKAO_OAUTH);
+        validateKakaoTokenNotUsed(token);
+    }
+
+    private void validateKakaoTokenNotUsed(String token) {
+        String email = getClaim(token).getSubject();
+        if (Objects.equals(redisTemplate.opsForValue().get(TokenType.KAKAO_OAUTH.getPrefix() + email), token)) {
+            throw new CustomException(INVALID_KAKAO_TOKEN);
+        }
+    }
+
+    private void validateTokenNotExpired(String token, TokenType tokenType) {
         Date expiration = getClaim(token).getExpiration();
         long now = new Date().getTime();
-        if((expiration.getTime() - now) < 0){
-            throw new CustomException(ACCESS_TOKEN_EXPIRED);
+        if ((expiration.getTime() - now) < 0) {
+            if (tokenType.equals(TokenType.ACCESS)) {
+                throw new CustomException(ACCESS_TOKEN_EXPIRED);
+            }
+            if (token.equals(TokenType.KAKAO_OAUTH)) {
+                throw new CustomException(INVALID_KAKAO_TOKEN);
+            }
         }
     }
 
