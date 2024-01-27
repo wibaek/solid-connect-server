@@ -4,9 +4,9 @@ import lombok.Getter;
 
 @Getter
 public class StatusResponse extends CustomResponse {
-    private final Boolean status;
+    private final boolean status;
 
-    StatusResponse(Boolean status) {
+    public StatusResponse(boolean status) {
         this.status = status;
     }
 }

@@ -1,5 +1,6 @@
 package com.example.solidconnection.auth.dto;
 
+import com.example.solidconnection.auth.dto.kakao.KakaoOauthResponseDto;
 import lombok.*;
 
 @Getter

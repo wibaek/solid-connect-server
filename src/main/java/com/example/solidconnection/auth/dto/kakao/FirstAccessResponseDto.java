@@ -1,4 +1,4 @@
-package com.example.solidconnection.auth.dto;
+package com.example.solidconnection.auth.dto.kakao;
 
 import lombok.*;
 

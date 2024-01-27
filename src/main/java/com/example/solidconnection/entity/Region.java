@@ -10,7 +10,7 @@ public class Region {
     @Id
     @Column(length = 10)
     @Enumerated(EnumType.STRING)
-    private RegionCode id;
+    private RegionCode regionCode;
 
     // 연관 관계
     @OneToMany(mappedBy = "region")
@@ -18,9 +18,6 @@ public class Region {
 
     @OneToMany(mappedBy = "region")
     private Set<InterestedRegion> interestedRegions;
-
-    @OneToMany(mappedBy = "region")
-    private Set<InterestedCountry> interestedCountries;
 
     @OneToMany(mappedBy = "region")
     private Set<University> universities;

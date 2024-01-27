@@ -1,4 +1,4 @@
-package com.example.solidconnection.auth.dto;
+package com.example.solidconnection.auth.dto.kakao;
 
 import com.fasterxml.jackson.annotation.JsonIgnoreProperties;
 import com.fasterxml.jackson.annotation.JsonProperty;
@@ -12,8 +12,8 @@ import lombok.Setter;
 @JsonIgnoreProperties(ignoreUnknown = true)
 @AllArgsConstructor
 @NoArgsConstructor
-public class KakaoAccount {
-    @JsonProperty("profile")
-    private KakaoProfile profile;
-    private String email;
+public class KakaoProfile {
+    private String nickname;
+    @JsonProperty("profile_image_url")
+    private String profileImageUrl;
 }

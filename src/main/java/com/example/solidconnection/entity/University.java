@@ -64,11 +64,11 @@ public class University {
 
     // 연관 관계
     @ManyToOne
-    @JoinColumn(name = "country_id")
+    @JoinColumn(name = "country_code")
     private Country country;
 
     @ManyToOne
-    @JoinColumn(name = "region_id")
+    @JoinColumn(name = "region_code")
     private Region region;
 
     @OneToMany(mappedBy = "university")

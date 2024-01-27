@@ -1,4 +1,4 @@
-package com.example.solidconnection.auth.dto;
+package com.example.solidconnection.auth.dto.kakao;
 
 import com.fasterxml.jackson.annotation.JsonIgnoreProperties;
 import com.fasterxml.jackson.annotation.JsonProperty;
@@ -12,9 +12,7 @@ import lombok.Setter;
 @JsonIgnoreProperties(ignoreUnknown = true)
 @AllArgsConstructor
 @NoArgsConstructor
-public class KakaoTokenDto {
-    @JsonProperty("access_token")
-    private String accessToken;
-    @JsonProperty("refresh_token")
-    private String refreshToken;
+public class KakaoUserInfoDto {
+    @JsonProperty("kakao_account")
+    private KakaoAccount kakaoAccount;
 }

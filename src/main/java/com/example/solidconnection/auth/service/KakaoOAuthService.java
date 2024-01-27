@@ -1,6 +1,7 @@
 package com.example.solidconnection.auth.service;
 
-import com.example.solidconnection.auth.dto.*;
+import com.example.solidconnection.auth.dto.SignInResponseDto;
+import com.example.solidconnection.auth.dto.kakao.*;
 import com.example.solidconnection.config.token.TokenService;
 import com.example.solidconnection.config.token.TokenType;
 import com.example.solidconnection.custom.exception.CustomException;
@@ -56,7 +57,7 @@ public class KakaoOAuthService {
             );
             return Objects.requireNonNull(response.getBody()).getAccessToken();
         } catch (Exception e){
-            throw new CustomException(KAKAO_AUTH_CODE_FAIL);
+            throw new CustomException(INVALID_KAKAO_AUTH_CODE);
         }
     }
 
@@ -93,8 +94,9 @@ public class KakaoOAuthService {
     }
 
     private SignInResponseDto kakaoSignIn(String email) {
-        var accessToken = tokenService.generateToken(email, TokenType.ACCESS);
-        var refreshToken = tokenService.saveToken(email, TokenType.REFRESH);
+        String accessToken = tokenService.generateToken(email, TokenType.ACCESS);
+        String refreshToken = tokenService.generateToken(email, TokenType.REFRESH);
+        tokenService.saveToken(refreshToken, TokenType.REFRESH);
         return SignInResponseDto.builder()
                 .registered(true)
                 .accessToken(accessToken)

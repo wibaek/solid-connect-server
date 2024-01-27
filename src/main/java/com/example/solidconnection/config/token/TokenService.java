@@ -29,10 +29,8 @@ public class TokenService {
 
     public String generateToken(String email, TokenType tokenType) {
         Claims claims = Jwts.claims().setSubject(email);
-
-        var now = new Date();
-        var expiredDate = new Date(now.getTime() + tokenType.getExpireTime());
-
+        Date now = new Date();
+        Date expiredDate = new Date(now.getTime() + tokenType.getExpireTime());
         return Jwts.builder()
                 .setClaims(claims)
                 .setIssuedAt(now)
@@ -41,16 +39,13 @@ public class TokenService {
                 .compact();
     }
 
-    public String saveToken(String email, TokenType tokenType) {
-        String token = generateToken(email, tokenType);
-
+    public void saveToken(String token, TokenType tokenType) {
         redisTemplate.opsForValue().set(
-                tokenType.getPrefix() + email,
+                tokenType.getPrefix() + getClaim(token).getSubject(),
                 token,
                 tokenType.getExpireTime(),
                 TimeUnit.MILLISECONDS
         );
-        return token;
     }
 
     public Authentication getAuthentication(String token) {
@@ -58,6 +53,10 @@ public class TokenService {
         UserDetails userDetails = (UserDetails) siteUserRepository.findByEmail(email)
                 .orElseThrow(() -> new CustomException(EMAIL_NOT_FOUND));
         return new UsernamePasswordAuthenticationToken(userDetails, "", userDetails.getAuthorities());
+    }
+
+    public String getEmail(String token) {
+        return getClaim(token).getSubject();
     }
 
     private Claims getClaim(String token) {
