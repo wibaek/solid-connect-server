@@ -2,15 +2,16 @@ package com.example.solidconnection.auth.service;
 
 
 import com.example.solidconnection.auth.dto.SignUpRequestDto;
+import com.example.solidconnection.auth.dto.SignUpResponseDto;
 import com.example.solidconnection.config.token.TokenService;
 import com.example.solidconnection.config.token.TokenType;
 import com.example.solidconnection.config.token.TokenValidator;
-import com.example.solidconnection.country.CountryRepository;
-import com.example.solidconnection.country.InterestedCountyRepository;
 import com.example.solidconnection.custom.exception.CustomException;
 import com.example.solidconnection.entity.*;
-import com.example.solidconnection.region.InterestedRegionRepository;
-import com.example.solidconnection.region.RegionRepository;
+import com.example.solidconnection.repositories.CountryRepository;
+import com.example.solidconnection.repositories.InterestedCountyRepository;
+import com.example.solidconnection.repositories.InterestedRegionRepository;
+import com.example.solidconnection.repositories.RegionRepository;
 import com.example.solidconnection.siteuser.repository.SiteUserRepository;
 import com.example.solidconnection.type.CountryCode;
 import com.example.solidconnection.type.RegionCode;
@@ -18,6 +19,7 @@ import com.example.solidconnection.type.Role;
 import lombok.RequiredArgsConstructor;
 import org.springframework.data.redis.core.RedisTemplate;
 import org.springframework.stereotype.Service;
+import org.springframework.transaction.annotation.Transactional;
 
 import java.time.LocalDate;
 import java.time.format.DateTimeFormatter;
@@ -29,6 +31,7 @@ import java.util.stream.Collectors;
 import static com.example.solidconnection.custom.exception.ErrorCode.*;
 
 @Service
+@Transactional
 @RequiredArgsConstructor
 public class AuthService {
 
@@ -41,7 +44,7 @@ public class AuthService {
     private final CountryRepository countryRepository;
     private final InterestedCountyRepository interestedCountyRepository;
 
-    public boolean signUp(SignUpRequestDto signUpRequestDto) {
+    public SignUpResponseDto signUp(SignUpRequestDto signUpRequestDto) {
         tokenValidator.validateKakaoToken(signUpRequestDto.getKakaoOauthToken());
         validateUserNotDuplicated(signUpRequestDto);
         validateNicknameDuplicated(signUpRequestDto.getNickname());
@@ -52,7 +55,16 @@ public class AuthService {
 
         saveInterestedRegion(signUpRequestDto, savedSiteUser);
         saveInterestedCountry(signUpRequestDto, savedSiteUser);
-        return true;
+
+        String email = savedSiteUser.getEmail();
+        String accessToken = tokenService.generateToken(email, TokenType.ACCESS);
+        String refreshToken = tokenService.generateToken(email, TokenType.REFRESH);
+        tokenService.saveToken(refreshToken, TokenType.REFRESH);
+
+        return SignUpResponseDto.builder()
+                .accessToken(accessToken)
+                .refreshToken(refreshToken)
+                .build();
     }
 
     public boolean signOut(String email){
@@ -63,6 +75,16 @@ public class AuthService {
                 TimeUnit.MILLISECONDS
         );
         return true;
+    }
+
+    public boolean quit(String email){
+        SiteUser siteUser = getValidatedUser(email);
+        siteUser.setQuitedAt(LocalDate.now().plusDays(1));
+        return true;
+    }
+
+    private SiteUser getValidatedUser(String email){
+        return siteUserRepository.findByEmail(email).orElseThrow(() -> new CustomException(USER_NOT_FOUND));
     }
 
     private void validateUserNotDuplicated(SignUpRequestDto signUpRequestDto){

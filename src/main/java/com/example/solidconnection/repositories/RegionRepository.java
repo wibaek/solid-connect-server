@@ -1,4 +1,4 @@
-package com.example.solidconnection.region;
+package com.example.solidconnection.repositories;
 
 import com.example.solidconnection.entity.Region;
 import com.example.solidconnection.type.RegionCode;

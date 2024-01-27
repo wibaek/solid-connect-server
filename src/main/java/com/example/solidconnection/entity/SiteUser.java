@@ -4,12 +4,9 @@ import com.example.solidconnection.type.Gender;
 import com.example.solidconnection.type.PreparationStatus;
 import com.example.solidconnection.type.Role;
 import jakarta.persistence.*;
-import lombok.AllArgsConstructor;
-import lombok.Builder;
-import lombok.Getter;
-import lombok.NoArgsConstructor;
+import lombok.*;
 
-import java.time.LocalDateTime;
+import java.time.LocalDate;
 import java.util.Set;
 
 @Entity
@@ -26,9 +23,11 @@ public class SiteUser {
     private String email;
 
     @Column(nullable = false, length = 100)
+    @Setter
     private String nickname;
 
     @Column(length = 500)
+    @Setter
     private String profileImageUrl;
 
     @Column(nullable = false, length = 20)
@@ -46,9 +45,11 @@ public class SiteUser {
     @Enumerated(EnumType.STRING)
     private Gender gender;
 
-    private LocalDateTime nicknameModifiedAt;
+    @Setter
+    private LocalDate nicknameModifiedAt;
 
-    private LocalDateTime quitedAt;
+    @Setter
+    private LocalDate quitedAt;
 
     // 연관관계
     @OneToMany(mappedBy = "siteUser")
