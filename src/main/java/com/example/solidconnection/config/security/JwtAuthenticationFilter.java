@@ -43,7 +43,7 @@ public class JwtAuthenticationFilter extends OncePerRequestFilter {
 
         try {
             String token = this.resolveAccessTokenFromRequest(request); // 웹 요청에서 토큰 추출
-            tokenValidator.validateAccessToken(token); // 유효한 액세스 토큰인지 검증
+            tokenValidator.validateAccessToken(token); // 액세스 토큰 검증 - 비어있는지, 유효한지, 리프레시 토큰, 로그아웃
             Authentication auth = this.tokenService.getAuthentication(token); // 토큰에서 인증 정보 가져옴
             SecurityContextHolder.getContext().setAuthentication(auth);// 인증 정보를 보안 컨텍스트에 설정
             filterChain.doFilter(request, response); // 다음 필터로 요청과 응답 전달
@@ -72,9 +72,7 @@ public class JwtAuthenticationFilter extends OncePerRequestFilter {
         permitAllEndpoints.add("/favicon.ico");
 
         // 이미지 업로드
-        permitAllEndpoints.add("/img-upload/profile");
-        permitAllEndpoints.add("/img-upload/gpa");
-        permitAllEndpoints.add("/img-upload/language");
+        permitAllEndpoints.add("/img/profile/pre");
 
         // 토큰이 필요하지 않은 인증
         permitAllEndpoints.add("/auth/kakao");

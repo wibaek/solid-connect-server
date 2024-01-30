@@ -7,6 +7,11 @@ import org.springframework.http.HttpStatus;
 @Getter
 @AllArgsConstructor
 public enum ErrorCode {
+    S3_SERVICE_EXCEPTION(HttpStatus.BAD_REQUEST.value(), "S3 서비스 에러 발생"),
+    S3_CLIENT_EXCEPTION(HttpStatus.BAD_REQUEST.value(), "S3 클라이언트 에러 발생"),
+    FILE_NOT_EXIST(HttpStatus.UNAUTHORIZED.value(), "파일이 없습니다."),
+    INVALID_FILE_EXTENSIONS(HttpStatus.UNAUTHORIZED.value(), "파일 형식이 유효하지 않습니다."),
+    NOT_IMG_FILE_EXTENSIONS(HttpStatus.UNAUTHORIZED.value(), "이미지만 업로드 할 수 있습니다."),
     USER_ALREADY_SIGN_OUT(HttpStatus.UNAUTHORIZED.value(), "로그아웃 되었습니다."),
     USER_ALREADY_EXISTED(HttpStatus.CONFLICT.value(), "이미 존재하는 회원입니다."),
     JSON_PARSING_FAILED(HttpStatus.BAD_REQUEST.value(), "JSON 파싱 에러"),
