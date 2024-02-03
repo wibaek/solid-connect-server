@@ -19,7 +19,4 @@ public class Country {
 
     @OneToMany(mappedBy = "country")
     private Set<University> universities;
-
-    @OneToMany(mappedBy = "country")
-    private Set<InterestedCountry> interestedCountries;
 }

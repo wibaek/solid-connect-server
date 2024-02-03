@@ -1,7 +1,7 @@
 package com.example.solidconnection.entity;
 
 import com.example.solidconnection.type.ExchangeSemester;
-import com.example.solidconnection.type.TuitionFeePaymentType;
+import com.example.solidconnection.type.TuitionFeeType;
 import jakarta.persistence.*;
 
 import java.util.Set;
@@ -19,18 +19,21 @@ public class University {
     private String englishName;
 
     @Column(nullable = false, length = 100)
-    private String internalName;
+    private String formatName;
 
     @Column(nullable = false)
-    private Integer recruitNumber;
+    private Integer studentCapacity;
 
     @Column(nullable = false, length = 50)
     @Enumerated(EnumType.STRING)
-    private TuitionFeePaymentType tuitionFeePaymentType;
+    private TuitionFeeType tuitionFeeType;
 
     @Column(nullable = false, length = 50)
     @Enumerated(EnumType.STRING)
     private ExchangeSemester exchangeSemester;
+
+    @Column(length = 10)
+    private Integer semesterRequirement;
 
     @Column(length = 1000)
     private String detailsForLanguage;
@@ -76,13 +79,4 @@ public class University {
 
     @OneToMany(mappedBy = "university")
     private Set<GpaRequirement> gpaRequirements;
-
-    @OneToMany(mappedBy = "firstChoiceUniversity")
-    private Set<Application> firstChoiceApplications;
-
-    @OneToMany(mappedBy = "secondChoiceUniversity")
-    private Set<Application> secondChoiceApplications;
-
-    @OneToMany(mappedBy = "university")
-    private Set<WishUniversity> wishUniversities;
 }

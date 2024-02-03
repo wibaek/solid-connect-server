@@ -60,8 +60,4 @@ public class SiteUser {
 
     @OneToMany(mappedBy = "siteUser")
     private Set<Application> applications;
-
-    @OneToMany(mappedBy = "siteUser")
-    private Set<WishUniversity> wishUniversities;
-
 }

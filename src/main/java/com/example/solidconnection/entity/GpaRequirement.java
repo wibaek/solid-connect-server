@@ -12,7 +12,7 @@ public class GpaRequirement {
     private String scale;
 
     @Column(nullable = false)
-    private Float minGpa;
+    private String minGpa;
 
     // 연관 관계
     @ManyToOne

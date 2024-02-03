@@ -17,8 +17,5 @@ public class Region {
     private Set<Country> countries;
 
     @OneToMany(mappedBy = "region")
-    private Set<InterestedRegion> interestedRegions;
-
-    @OneToMany(mappedBy = "region")
     private Set<University> universities;
 }

@@ -16,6 +16,7 @@ import org.springframework.transaction.annotation.Transactional;
 import org.springframework.web.client.RestTemplate;
 import org.springframework.web.util.UriComponentsBuilder;
 
+import java.util.Arrays;
 import java.util.Objects;
 
 import static com.example.solidconnection.custom.exception.ErrorCode.*;
@@ -63,6 +64,8 @@ public class KakaoOAuthService {
             );
             return Objects.requireNonNull(response.getBody()).getAccessToken();
         } catch (Exception e){
+            System.out.println(e.getMessage());
+            System.out.println(Arrays.toString(e.getStackTrace()));
             throw new CustomException(INVALID_KAKAO_AUTH_CODE);
         }
     }
