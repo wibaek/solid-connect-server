@@ -7,6 +7,7 @@ import com.example.solidconnection.config.token.TokenType;
 import com.example.solidconnection.custom.exception.CustomException;
 import com.example.solidconnection.entity.SiteUser;
 import com.example.solidconnection.siteuser.repository.SiteUserRepository;
+import com.example.solidconnection.siteuser.service.SiteUserValidator;
 import lombok.RequiredArgsConstructor;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.http.*;
@@ -26,6 +27,7 @@ public class KakaoOAuthService {
 
     private final RestTemplate restTemplate;
     private final TokenService tokenService;
+    private final SiteUserValidator siteUserValidator;
     private final SiteUserRepository siteUserRepository;
 
     @Value("${kakao.client_id}")
