@@ -7,6 +7,8 @@ import org.springframework.http.HttpStatus;
 @Getter
 @AllArgsConstructor
 public enum ErrorCode {
+    REDIRECT_URI_MISMATCH(HttpStatus.BAD_REQUEST.value(), "리다이렉트 uri가 잘못되었습니다."),
+    NOT_DEFINED_ERROR(HttpStatus.BAD_REQUEST.value(), "에러가 발생했습니다."),
     USER_ALREADY_SIGN_OUT(HttpStatus.UNAUTHORIZED.value(), "로그아웃 되었습니다."),
     USER_ALREADY_EXISTED(HttpStatus.CONFLICT.value(), "이미 존재하는 회원입니다."),
     JSON_PARSING_FAILED(HttpStatus.BAD_REQUEST.value(), "JSON 파싱 에러"),

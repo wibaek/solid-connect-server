@@ -60,7 +60,10 @@ public class KakaoOAuthService {
                     KakaoTokenDto.class
             );
             return Objects.requireNonNull(response.getBody()).getAccessToken();
-        } catch (Exception e){
+        } catch (Exception e) {
+            if (e.getMessage().contains("KOE303")) {
+                throw new CustomException(REDIRECT_URI_MISMATCH);
+            }
             throw new CustomException(INVALID_KAKAO_AUTH_CODE);
         }
     }
@@ -108,7 +111,7 @@ public class KakaoOAuthService {
                 .build();
     }
 
-    public void resetQuitedAt(String email){
+    public void resetQuitedAt(String email) {
         SiteUser siteUser = siteUserRepository.findByEmail(email).orElseThrow(() -> new CustomException(USER_NOT_FOUND));
         siteUser.setQuitedAt(null);
     }
