@@ -16,6 +16,6 @@ public class GpaRequirement {
 
     // 연관 관계
     @ManyToOne
-    @JoinColumn(name = "university_id")
-    private University university;
+    @JoinColumn(name = "university_info_for_apply_id")
+    private UniversityInfoForApply universityInfoForApply;
 }
