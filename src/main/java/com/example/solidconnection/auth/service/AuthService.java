@@ -123,7 +123,7 @@ public class AuthService {
         List<InterestedCountry> interestedCountries = signUpRequestDto.getInterestedCountries().stream()
                 .map(CountryCode::getCountryCodeByKoreanName)
                 .map(countryCode -> {
-                    Country country = countryRepository.findByCountryCode(countryCode)
+                    Country country = countryRepository.findByCode(countryCode)
                             .orElseThrow(() -> new RuntimeException("Country Code enum이랑 table이랑 다름 : " + countryCode.name()));
                     return InterestedCountry.builder()
                             .siteUser(savedSiteUser)
@@ -138,7 +138,7 @@ public class AuthService {
         List<InterestedRegion> interestedRegions = signUpRequestDto.getInterestedRegions().stream()
                 .map(RegionCode::getRegionCodeByKoreanName)
                 .map(regionCode -> {
-                    Region region = regionRepository.findByRegionCode(regionCode)
+                    Region region = regionRepository.findByCode(regionCode)
                             .orElseThrow(() -> new RuntimeException("Region Code enum이랑 table이랑 다름 : " + regionCode.name()));
                     return InterestedRegion.builder()
                             .siteUser(savedSiteUser)

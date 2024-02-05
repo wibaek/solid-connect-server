@@ -1,12 +1,14 @@
 package com.example.solidconnection.type;
 
-public enum ExchangeSemester {
+public enum SemesterAvailableForDispatch {
     ONE_SEMESTER("1개학기"),
-    NO_PREFERENCE("무관");
+    FOUR_SEMESTER("4개학기"),
+    ONE_YEAR("1년만 가능"),
+    IRRELEVANT("무관");
 
     private final String koreanName;
 
-    ExchangeSemester(String koreanName) {
+    SemesterAvailableForDispatch(String koreanName) {
         this.koreanName = koreanName;
     }
 

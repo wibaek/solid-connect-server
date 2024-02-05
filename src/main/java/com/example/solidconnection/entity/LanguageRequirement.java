@@ -17,7 +17,7 @@ public class LanguageRequirement {
     private String minScore;
 
     // 연관 관계
-    @ManyToOne
-    @JoinColumn(name = "university_id")
-    private University university;
+    @ManyToOne(fetch = FetchType.LAZY)
+    @JoinColumn(name = "university_info_for_apply_id")
+    private UniversityInfoForApply universityInfoForApply;
 }

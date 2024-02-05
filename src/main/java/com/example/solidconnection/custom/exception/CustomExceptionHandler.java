@@ -17,6 +17,8 @@ public class CustomExceptionHandler {
 
     @ExceptionHandler(CustomException.class)
     protected ResponseEntity<ErrorResponse> handleCustomException(CustomException e) {
+        log.error(e.getMessage());
+        e.printStackTrace();
         ErrorResponse errorResponse = new ErrorResponse(e);
         return new ResponseEntity<>(errorResponse, HttpStatus.valueOf(e.getCode()));
     }
