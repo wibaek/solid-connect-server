@@ -13,7 +13,7 @@ import static com.example.solidconnection.custom.exception.ErrorCode.USER_NOT_FO
 public class SiteUserValidator {
     private final SiteUserRepository siteUserRepository;
 
-    public SiteUser validateExistByEmail(String email){
+    public SiteUser getValidatedUserByEmail(String email){
         return siteUserRepository.findByEmail(email)
                 .orElseThrow(() -> new CustomException(USER_NOT_FOUND));
     }

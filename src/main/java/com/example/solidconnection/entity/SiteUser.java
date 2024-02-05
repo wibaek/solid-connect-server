@@ -7,6 +7,7 @@ import jakarta.persistence.*;
 import lombok.*;
 
 import java.time.LocalDate;
+import java.time.LocalDateTime;
 import java.util.Set;
 
 @Entity
@@ -46,7 +47,7 @@ public class SiteUser {
     private Gender gender;
 
     @Setter
-    private LocalDate nicknameModifiedAt;
+    private LocalDateTime nicknameModifiedAt;
 
     @Setter
     private LocalDate quitedAt;
