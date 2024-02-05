@@ -2,8 +2,10 @@ package com.example.solidconnection.entity;
 
 import com.example.solidconnection.type.LanguageTestType;
 import jakarta.persistence.*;
+import lombok.Getter;
 
 @Entity
+@Getter
 public class LanguageRequirement {
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
