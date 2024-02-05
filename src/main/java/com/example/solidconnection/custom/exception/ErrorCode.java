@@ -7,6 +7,8 @@ import org.springframework.http.HttpStatus;
 @Getter
 @AllArgsConstructor
 public enum ErrorCode {
+    INVALID_INPUT(HttpStatus.BAD_REQUEST.value(), "값을 입력할 수 없습니다."),
+    CAN_NOT_CHANGE_NICKNAME_YET(HttpStatus.BAD_REQUEST.value(), "마지막 닉네임 변경으로부터 7일이 지나지 않았습니다."),
     UNIVERSITY_INFO_FOR_APPLY_NOT_FOUND(HttpStatus.BAD_REQUEST.value(), "존재하지 않는 대학교 지원 정보입니다."),
     UNIVERSITY_NOT_FOUND(HttpStatus.BAD_REQUEST.value(), "존재하지 않는 대학교입니다."),
     REDIRECT_URI_MISMATCH(HttpStatus.BAD_REQUEST.value(), "리다이렉트 uri가 잘못되었습니다."),
