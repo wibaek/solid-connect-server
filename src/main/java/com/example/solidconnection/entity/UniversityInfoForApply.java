@@ -3,14 +3,19 @@ package com.example.solidconnection.entity;
 import com.example.solidconnection.type.SemesterAvailableForDispatch;
 import com.example.solidconnection.type.TuitionFeeType;
 import jakarta.persistence.*;
+import lombok.Getter;
 
 import java.util.Set;
 
 @Entity
+@Getter
 public class UniversityInfoForApply {
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     private Long id;
+
+    @Column(length = 10)
+    private String term;
 
     @Column(nullable = false)
     private Integer studentCapacity;
@@ -24,10 +29,16 @@ public class UniversityInfoForApply {
     private SemesterAvailableForDispatch semesterAvailableForDispatch;
 
     @Column(length = 10)
-    private Integer semesterRequirement;
+    private String semesterRequirement;
 
     @Column(length = 1000)
     private String detailsForLanguage;
+
+    @Column(length = 5)
+    private String gpaRequirement;
+
+    @Column(length = 5)
+    private String gpaRequirementCriteria;
 
     @Column(length = 1000)
     private String detailsForApply;
@@ -47,9 +58,6 @@ public class UniversityInfoForApply {
     // 연관 관계
     @OneToMany(mappedBy = "universityInfoForApply", fetch = FetchType.LAZY)
     private Set<LanguageRequirement> languageRequirements;
-
-    @OneToMany(mappedBy = "universityInfoForApply", fetch = FetchType.LAZY)
-    private Set<GpaRequirement> gpaRequirements;
 
     @OneToOne
     @JoinColumn(name = "university_id")

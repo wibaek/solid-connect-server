@@ -2,8 +2,10 @@ package com.example.solidconnection.entity;
 
 import com.example.solidconnection.type.CountryCode;
 import jakarta.persistence.*;
+import lombok.Getter;
 
 @Entity
+@Getter
 public class Country {
     @Id
     @Column(length = 2, name = "country_code", columnDefinition = "VARCHAR(2)")

@@ -7,6 +7,8 @@ import org.springframework.http.HttpStatus;
 @Getter
 @AllArgsConstructor
 public enum ErrorCode {
+    UNIVERSITY_INFO_FOR_APPLY_NOT_FOUND(HttpStatus.BAD_REQUEST.value(), "존재하지 않는 대학교 지원 정보입니다."),
+    UNIVERSITY_NOT_FOUND(HttpStatus.BAD_REQUEST.value(), "존재하지 않는 대학교입니다."),
     REDIRECT_URI_MISMATCH(HttpStatus.BAD_REQUEST.value(), "리다이렉트 uri가 잘못되었습니다."),
     NOT_DEFINED_ERROR(HttpStatus.BAD_REQUEST.value(), "에러가 발생했습니다."),
     S3_SERVICE_EXCEPTION(HttpStatus.BAD_REQUEST.value(), "S3 서비스 에러 발생"),

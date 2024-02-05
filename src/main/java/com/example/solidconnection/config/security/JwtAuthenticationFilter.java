@@ -78,6 +78,10 @@ public class JwtAuthenticationFilter extends OncePerRequestFilter {
         permitAllEndpoints.add("/auth/kakao");
         permitAllEndpoints.add("/auth/sign-up");
 
+        // 대학교 정보
+        permitAllEndpoints.add("/university/detail/**");
+        permitAllEndpoints.add("/university/search/**");
+
         return permitAllEndpoints;
     }
 }

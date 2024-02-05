@@ -49,7 +49,9 @@ public class SecurityConfiguration {
                         .requestMatchers(
                                 "/", "/index.html", "/favicon.ico",
                                 "/img/profile/pre",
-                                "/auth/kakao",  "/auth/sign-up")
+                                "/auth/kakao",  "/auth/sign-up",
+                                "/university/detail/**", "/university/search/**"
+                                )
                         .permitAll()
                         .anyRequest().authenticated())
                 .addFilterBefore(this.jwtAuthenticationFilter, UsernamePasswordAuthenticationFilter.class)

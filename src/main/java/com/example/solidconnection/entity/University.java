@@ -1,8 +1,10 @@
 package com.example.solidconnection.entity;
 
 import jakarta.persistence.*;
+import lombok.Getter;
 
 @Entity
+@Getter
 public class University {
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
