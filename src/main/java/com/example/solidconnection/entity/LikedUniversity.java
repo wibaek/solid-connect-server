@@ -5,7 +5,7 @@ import lombok.Getter;
 
 @Entity
 @Getter
-public class WishUniversity {
+public class LikedUniversity {
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     private Long id;

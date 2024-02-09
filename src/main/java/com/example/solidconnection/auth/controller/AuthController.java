@@ -9,6 +9,7 @@ import com.example.solidconnection.auth.service.KakaoOAuthService;
 import com.example.solidconnection.custom.response.CustomResponse;
 import com.example.solidconnection.custom.response.DataResponse;
 import com.example.solidconnection.custom.response.StatusResponse;
+import jakarta.validation.Valid;
 import lombok.RequiredArgsConstructor;
 import org.springframework.web.bind.annotation.*;
 
@@ -28,7 +29,7 @@ public class AuthController {
     }
 
     @PostMapping("/sign-up")
-    public CustomResponse signUp(@RequestBody SignUpRequestDto signUpRequestDto) {
+    public CustomResponse signUp(@Valid @RequestBody SignUpRequestDto signUpRequestDto) {
         SignUpResponseDto signUpResponseDto = authService.signUp(signUpRequestDto);
         return new DataResponse<>(signUpResponseDto);
     }
