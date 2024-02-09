@@ -25,19 +25,19 @@ public class MyPageService {
     private final LikedUniversityRepository likedUniversityRepository;
 
     public MyPageDto getMyPageInfo(String email) {
-        SiteUser siteUser = siteUserValidator.getValidatedUserByEmail(email);
+        SiteUser siteUser = siteUserValidator.getValidatedSiteUserByEmail(email);
         int likedUniversityCount = likedUniversityRepository.countBySiteUser_Email(email);
         return MyPageDto.fromEntity(siteUser, likedUniversityCount);
     }
 
     public MyPageUpdateDto getMyPageInfoToUpdate(String email) {
-        SiteUser siteUser = siteUserValidator.getValidatedUserByEmail(email);
+        SiteUser siteUser = siteUserValidator.getValidatedSiteUserByEmail(email);
         return MyPageUpdateDto.fromEntity(siteUser);
     }
 
     @Transactional
     public void update(String email, MyPageUpdateDto myPageUpdateDto) {
-        SiteUser siteUser = siteUserValidator.getValidatedUserByEmail(email);
+        SiteUser siteUser = siteUserValidator.getValidatedSiteUserByEmail(email);
         validateNicknameDuplicated(myPageUpdateDto.getNickname());
         validateNicknameNotChangedRecently(siteUser.getNicknameModifiedAt());
         siteUser.setNickname(myPageUpdateDto.getNickname());
