@@ -97,7 +97,7 @@ public class S3Service {
     }
 
     private String getExProfileImageUrl(String email){
-        SiteUser siteUser = siteUserValidator.getValidatedUserByEmail(email);
+        SiteUser siteUser = siteUserValidator.getValidatedSiteUserByEmail(email);
         String fileName = siteUser.getProfileImageUrl();
         int domainStartIndex = fileName.indexOf(".com");
         return fileName.substring(domainStartIndex + 5);
