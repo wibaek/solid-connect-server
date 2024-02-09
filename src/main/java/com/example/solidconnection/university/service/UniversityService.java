@@ -15,6 +15,7 @@ import com.example.solidconnection.university.dto.UniversityDetailDto;
 import com.example.solidconnection.university.repository.LanguageRequirementRepository;
 import com.example.solidconnection.university.repository.UniversityInfoForApplyRepository;
 import com.example.solidconnection.university.repository.UniversityRepository;
+import com.example.solidconnection.university.singleton.GeneralRecommendUniversities;
 import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Service;
 
@@ -22,6 +23,7 @@ import java.util.Collections;
 import java.util.List;
 import java.util.stream.Collectors;
 
+import static com.example.solidconnection.constants.constants.RECOMMEND_UNIVERSITY_NUM;
 import static com.example.solidconnection.custom.exception.ErrorCode.UNIVERSITY_INFO_FOR_APPLY_NOT_FOUND;
 import static com.example.solidconnection.custom.exception.ErrorCode.UNIVERSITY_NOT_FOUND;
 
@@ -29,14 +31,13 @@ import static com.example.solidconnection.custom.exception.ErrorCode.UNIVERSITY_
 @RequiredArgsConstructor
 public class UniversityService {
 
-    private final static int RECOMMEND_NUM = 6;
-
     private final UniversityInfoForApplyRepository universityInfoForApplyRepository;
     private final UniversityRepository universityRepository;
     private final LanguageRequirementRepository languageRequirementRepository;
     private final SiteUserValidator siteUserValidator;
     private final InterestedCountyRepository interestedCountyRepository;
     private final InterestedRegionRepository interestedRegionRepository;
+    private final GeneralRecommendUniversities generalRecommendUniversities;
 
     public List<RecommendedUniversityDto> getPersonalRecommends(String email){
         SiteUser siteUser = siteUserValidator.getValidatedSiteUserByEmail(email);
@@ -53,27 +54,26 @@ public class UniversityService {
                 .toList());
 
         Collections.shuffle(recommendedUniversities);
-        List<UniversityInfoForApply> shuffledList = recommendedUniversities.subList(0, Math.min(RECOMMEND_NUM, recommendedUniversities.size()));
+        List<UniversityInfoForApply> shuffledList = recommendedUniversities.subList(0, Math.min(RECOMMEND_UNIVERSITY_NUM, recommendedUniversities.size()));
         if(shuffledList.size() < 6){
-            shuffledList.addAll(getRandomRecommendsExcept(shuffledList));
+            shuffledList.addAll(getGeneralRecommendsExcept(shuffledList));
         }
 
         return shuffledList.stream().map(RecommendedUniversityDto::fromEntity).collect(Collectors.toList());
     }
 
     public List<RecommendedUniversityDto> getGeneralRecommends(){
-        List<UniversityInfoForApply> list = new java.util.ArrayList<>(universityInfoForApplyRepository.findAll());
-        Collections.shuffle(list);
-        List<UniversityInfoForApply> shuffledList = list.subList(0, RECOMMEND_NUM);
-        return shuffledList.stream().map(RecommendedUniversityDto::fromEntity).collect(Collectors.toList());
+        List<UniversityInfoForApply> generalRecommend = new java.util.ArrayList<>(generalRecommendUniversities.getRecommendedUniversities());
+        Collections.shuffle(generalRecommend);
+        return generalRecommend.stream().map(RecommendedUniversityDto::fromEntity).collect(Collectors.toList());
     }
 
-    private List<UniversityInfoForApply> getRandomRecommendsExcept(List<UniversityInfoForApply> alreadyPicked){
-        List<UniversityInfoForApply> list = new java.util.ArrayList<>(universityInfoForApplyRepository.findAll());
-        list.removeAll(alreadyPicked);
-        int sizeToPick = RECOMMEND_NUM - list.size();
-        Collections.shuffle(list);
-        return list.subList(0, sizeToPick);
+    private List<UniversityInfoForApply> getGeneralRecommendsExcept(List<UniversityInfoForApply> alreadyPicked){
+        List<UniversityInfoForApply> generalRecommend = new java.util.ArrayList<>(generalRecommendUniversities.getRecommendedUniversities());
+        generalRecommend.removeAll(alreadyPicked);
+        int sizeToPick = RECOMMEND_UNIVERSITY_NUM - alreadyPicked.size();
+        Collections.shuffle(generalRecommend);
+        return generalRecommend.subList(0, sizeToPick);
     }
 
     public UniversityDetailDto getDetail(Long universityInfoForApplyId){

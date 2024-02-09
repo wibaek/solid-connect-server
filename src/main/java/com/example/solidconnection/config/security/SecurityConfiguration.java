@@ -50,7 +50,7 @@ public class SecurityConfiguration {
                                 "/", "/index.html", "/favicon.ico",
                                 "/img/profile/pre",
                                 "/auth/kakao",  "/auth/sign-up",
-                                "/university/detail/**", "/university/search/**"
+                                "/university/detail/**", "/university/search/**", "/home"
                                 )
                         .permitAll()
                         .anyRequest().authenticated())
