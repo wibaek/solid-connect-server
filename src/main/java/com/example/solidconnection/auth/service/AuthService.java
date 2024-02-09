@@ -80,7 +80,7 @@ public class AuthService {
     }
 
     public boolean quit(String email){
-        SiteUser siteUser = siteUserValidator.validateExistByEmail(email);
+        SiteUser siteUser = siteUserValidator.getValidatedSiteUserByEmail(email);
         siteUser.setQuitedAt(LocalDate.now().plusDays(1));
         return true;
     }
