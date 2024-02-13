@@ -66,7 +66,7 @@ public class ApplicationService {
         UniversityInfoForApply firstChoiceUniversity = universityValidator.getValidatedUniversityInfoForApplyById(universityRequestDto.getFirstChoiceUniversityId());
         UniversityInfoForApply secondChoiceUniversity;
         try {
-            secondChoiceUniversity = universityValidator.getValidatedUniversityInfoForApplyById(universityRequestDto.getSecondChoiceUniversity());
+            secondChoiceUniversity = universityValidator.getValidatedUniversityInfoForApplyById(universityRequestDto.getSecondChoiceUniversityId());
         } catch (Exception e) {
             secondChoiceUniversity = null;
         }
@@ -78,7 +78,7 @@ public class ApplicationService {
 
         // 수정
         application.setFirstChoiceUniversity(firstChoiceUniversity);
-        application.setFirstChoiceUniversity(secondChoiceUniversity);
+        application.setSecondChoiceUniversity(secondChoiceUniversity);
 
         // 새로운 닉네임 부여
         String randomNickname = makeRandomNickname();
