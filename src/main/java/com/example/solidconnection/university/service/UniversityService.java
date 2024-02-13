@@ -1,6 +1,5 @@
 package com.example.solidconnection.university.service;
 
-import com.example.solidconnection.custom.exception.CustomException;
 import com.example.solidconnection.entity.SiteUser;
 import com.example.solidconnection.entity.University;
 import com.example.solidconnection.entity.UniversityInfoForApply;
@@ -15,7 +14,7 @@ import com.example.solidconnection.university.dto.UniversityDetailDto;
 import com.example.solidconnection.university.repository.LanguageRequirementRepository;
 import com.example.solidconnection.university.repository.UniversityInfoForApplyRepository;
 import com.example.solidconnection.university.repository.UniversityRepository;
-import com.example.solidconnection.university.singleton.GeneralRecommendUniversities;
+import com.example.solidconnection.constants.GeneralRecommendUniversities;
 import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Service;
 
@@ -23,9 +22,7 @@ import java.util.Collections;
 import java.util.List;
 import java.util.stream.Collectors;
 
-import static com.example.solidconnection.constants.constants.RECOMMEND_UNIVERSITY_NUM;
-import static com.example.solidconnection.custom.exception.ErrorCode.UNIVERSITY_INFO_FOR_APPLY_NOT_FOUND;
-import static com.example.solidconnection.custom.exception.ErrorCode.UNIVERSITY_NOT_FOUND;
+import static com.example.solidconnection.constants.Constants.RECOMMEND_UNIVERSITY_NUM;
 
 @Service
 @RequiredArgsConstructor
@@ -38,6 +35,7 @@ public class UniversityService {
     private final InterestedCountyRepository interestedCountyRepository;
     private final InterestedRegionRepository interestedRegionRepository;
     private final GeneralRecommendUniversities generalRecommendUniversities;
+    private final UniversityValidator universityValidator;
 
     public List<RecommendedUniversityDto> getPersonalRecommends(String email){
         SiteUser siteUser = siteUserValidator.getValidatedSiteUserByEmail(email);
@@ -77,8 +75,8 @@ public class UniversityService {
     }
 
     public UniversityDetailDto getDetail(Long universityInfoForApplyId){
-        UniversityInfoForApply universityInfoForApply = getValidatedUniversityInfoForApply(universityInfoForApplyId);
-        University university = getValidatedUniversity(universityInfoForApply.getUniversity().getId());
+        UniversityInfoForApply universityInfoForApply = universityValidator.getValidatedUniversityInfoForApplyById(universityInfoForApplyId);
+        University university = universityValidator.getValidatedUniversityById(universityInfoForApply.getUniversity().getId());
 
         List<LanguageRequirementDto> languageRequirements = languageRequirementRepository
                 .findAllByUniversityInfoForApply_Id(universityInfoForApplyId)
@@ -125,13 +123,5 @@ public class UniversityService {
                 .build();
     }
 
-    private UniversityInfoForApply getValidatedUniversityInfoForApply(Long id){
-        return universityInfoForApplyRepository.findById(id)
-                .orElseThrow(() -> new CustomException(UNIVERSITY_INFO_FOR_APPLY_NOT_FOUND));
-    }
 
-    private University getValidatedUniversity(Long id){
-        return universityRepository.findById(id)
-                .orElseThrow(() -> new CustomException(UNIVERSITY_NOT_FOUND));
-    }
 }

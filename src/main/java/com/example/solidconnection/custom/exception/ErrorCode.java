@@ -4,11 +4,14 @@ import lombok.AllArgsConstructor;
 import lombok.Getter;
 import org.springframework.http.HttpStatus;
 
-import static com.example.solidconnection.constants.constants.MIN_DAYS_BETWEEN_NICKNAME_CHANGES;
+import static com.example.solidconnection.constants.Constants.MIN_DAYS_BETWEEN_NICKNAME_CHANGES;
 
 @Getter
 @AllArgsConstructor
 public enum ErrorCode {
+    APPLY_UPDATE_LIMIT_EXCEED(HttpStatus.BAD_REQUEST.value(), "지원 정보 수정은 3회까지만 가능합니다."),
+    CANT_APPLY_FOR_SAME_UNIVERSITY(HttpStatus.BAD_REQUEST.value(), "1, 2지망에 동일한 대학교를 입력할 수 없습니다."),
+    SCORE_SUBMIT_FIRST(HttpStatus.BAD_REQUEST.value(), "성적 입력 후 지망 대학을 입력할 수 있습니다."),
     INVALID_INPUT(HttpStatus.BAD_REQUEST.value(), "값을 입력할 수 없습니다."),
     CAN_NOT_CHANGE_NICKNAME_YET(HttpStatus.BAD_REQUEST.value(), "마지막 닉네임 변경으로부터 "+MIN_DAYS_BETWEEN_NICKNAME_CHANGES+"일이 지나지 않았습니다."),
     UNIVERSITY_INFO_FOR_APPLY_NOT_FOUND(HttpStatus.BAD_REQUEST.value(), "존재하지 않는 대학교 지원 정보입니다."),
