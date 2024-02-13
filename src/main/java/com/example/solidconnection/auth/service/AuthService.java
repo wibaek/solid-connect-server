@@ -1,6 +1,7 @@
 package com.example.solidconnection.auth.service;
 
 
+import com.example.solidconnection.auth.dto.ReissueResponseDto;
 import com.example.solidconnection.auth.dto.SignUpRequestDto;
 import com.example.solidconnection.auth.dto.SignUpResponseDto;
 import com.example.solidconnection.config.token.TokenService;
@@ -21,6 +22,7 @@ import lombok.RequiredArgsConstructor;
 import org.springframework.data.redis.core.RedisTemplate;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
+import org.springframework.util.ObjectUtils;
 
 import java.time.LocalDate;
 import java.time.format.DateTimeFormatter;
@@ -83,6 +85,20 @@ public class AuthService {
         SiteUser siteUser = siteUserValidator.getValidatedSiteUserByEmail(email);
         siteUser.setQuitedAt(LocalDate.now().plusDays(1));
         return true;
+    }
+
+    public ReissueResponseDto reissue(String email) {
+        // 리프레시 토큰 만료 확인
+        String refreshTokenKey= TokenType.REFRESH.getPrefix() + email;
+        String refreshToken = redisTemplate.opsForValue().get(refreshTokenKey);
+        if (ObjectUtils.isEmpty(refreshToken)) {
+            throw new CustomException(REFRESH_TOKEN_EXPIRED);
+        }
+        // 엑세스 토큰 재발급
+        String newAccessToken = tokenService.generateToken(email, TokenType.ACCESS);
+        return ReissueResponseDto.builder()
+                .accessToken(newAccessToken)
+                .build();
     }
 
     private void validateUserNotDuplicated(SignUpRequestDto signUpRequestDto){
