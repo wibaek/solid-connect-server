@@ -13,7 +13,7 @@ import org.springframework.transaction.annotation.Transactional;
 import java.time.LocalDateTime;
 import java.time.format.DateTimeFormatter;
 
-import static com.example.solidconnection.constants.constants.MIN_DAYS_BETWEEN_NICKNAME_CHANGES;
+import static com.example.solidconnection.constants.Constants.MIN_DAYS_BETWEEN_NICKNAME_CHANGES;
 import static com.example.solidconnection.custom.exception.ErrorCode.CAN_NOT_CHANGE_NICKNAME_YET;
 import static com.example.solidconnection.custom.exception.ErrorCode.NICKNAME_ALREADY_EXISTED;
 

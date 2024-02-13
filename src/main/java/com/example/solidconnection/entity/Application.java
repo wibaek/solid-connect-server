@@ -1,11 +1,19 @@
 package com.example.solidconnection.entity;
 
+import com.example.solidconnection.application.dto.ScoreRequestDto;
 import com.example.solidconnection.type.LanguageTestType;
+import com.example.solidconnection.type.VerifyStatus;
 import jakarta.persistence.*;
-import lombok.Getter;
+import lombok.*;
+import org.hibernate.annotations.DynamicInsert;
 
 @Entity
 @Getter
+@Setter
+@Builder
+@NoArgsConstructor
+@AllArgsConstructor
+@DynamicInsert
 public class Application {
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
@@ -24,22 +32,45 @@ public class Application {
     @Column(nullable = false)
     private Float gpa;
 
+    @Column(nullable = false)
+    private Float gpaCriteria;
+
     @Column(nullable = false, length = 500)
     private String gpaReportUrl;
 
     @Column(nullable = false, length = 50)
-    private String verifyStatus;
+    @Enumerated(EnumType.STRING)
+    private VerifyStatus verifyStatus;
+
+    @Column(length = 100)
+    private String nicknameForApply;
+
+    @Column(nullable = false)
+    private Integer updateCount;
 
     // 연관 관계
     @ManyToOne
     @JoinColumn(name = "first_choice_univ_id")
-    private University firstChoiceUniversity;
+    private UniversityInfoForApply firstChoiceUniversity;
 
     @ManyToOne
     @JoinColumn(name = "second_choice_univ_id")
-    private University secondChoiceUniversity;
+    private UniversityInfoForApply secondChoiceUniversity;
 
     @ManyToOne
     @JoinColumn(name = "site_user_id")
     private SiteUser siteUser;
+
+    public static Application saveScore(SiteUser siteUser, ScoreRequestDto scoreRequestDto){
+        return Application.builder()
+                .siteUser(siteUser)
+                .languageTestType(scoreRequestDto.getLanguageTestType())
+                .languageTestScore(scoreRequestDto.getLanguageTestScore())
+                .languageTestReportUrl(scoreRequestDto.getLanguageTestReportUrl())
+                .gpa(scoreRequestDto.getGpa())
+                .gpaCriteria(scoreRequestDto.getGpaCriteria())
+                .gpaReportUrl(scoreRequestDto.getGpaReportUrl())
+                .verifyStatus(VerifyStatus.PENDING)
+                .build();
+    }
 }

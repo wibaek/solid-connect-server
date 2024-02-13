@@ -3,6 +3,8 @@ package com.example.solidconnection.config.security;
 import com.example.solidconnection.config.token.TokenService;
 import com.example.solidconnection.config.token.TokenValidator;
 import com.example.solidconnection.custom.exception.CustomException;
+import com.example.solidconnection.custom.exception.JwtExpiredTokenException;
+import io.jsonwebtoken.ExpiredJwtException;
 import jakarta.servlet.FilterChain;
 import jakarta.servlet.ServletException;
 import jakarta.servlet.http.HttpServletRequest;
@@ -18,6 +20,8 @@ import org.springframework.web.filter.OncePerRequestFilter;
 
 import java.io.IOException;
 import java.util.HashSet;
+
+import static com.example.solidconnection.custom.exception.ErrorCode.ACCESS_TOKEN_EXPIRED;
 
 @Component
 @RequiredArgsConstructor
@@ -44,11 +48,20 @@ public class JwtAuthenticationFilter extends OncePerRequestFilter {
         try {
             String token = this.resolveAccessTokenFromRequest(request); // 웹 요청에서 토큰 추출
             if (token != null) { // 토큰이 있어야 검증 - 토큰 유무에 대한 다른 처리를 컨트롤러에서 할 수 있음
-                tokenValidator.validateAccessToken(token); // 액세스 토큰 검증 - 비어있는지, 유효한지, 리프레시 토큰, 로그아웃
+                try {
+                    tokenValidator.validateAccessToken(token); // 액세스 토큰 검증 - 비어있는지, 유효한지, 리프레시 토큰, 로그아웃
+                } catch (ExpiredJwtException e) {
+                    throw new JwtExpiredTokenException(ACCESS_TOKEN_EXPIRED.getMessage());
+                }
                 Authentication auth = this.tokenService.getAuthentication(token); // 토큰에서 인증 정보 가져옴
                 SecurityContextHolder.getContext().setAuthentication(auth);// 인증 정보를 보안 컨텍스트에 설정
             }
+        } catch (JwtExpiredTokenException e) {
+            SecurityContextHolder.clearContext();
+            jwtAuthenticationEntryPoint.expiredCommence(request, response, e);
+            return;
         } catch (AuthenticationException e) {
+            SecurityContextHolder.clearContext();
             jwtAuthenticationEntryPoint.commence(request, response, e);
         } catch (CustomException e) {
             jwtAuthenticationEntryPoint.customCommence(request, response, e);
