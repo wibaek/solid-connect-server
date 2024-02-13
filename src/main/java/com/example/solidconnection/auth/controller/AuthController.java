@@ -1,5 +1,6 @@
 package com.example.solidconnection.auth.controller;
 
+import com.example.solidconnection.auth.dto.ReissueResponseDto;
 import com.example.solidconnection.auth.dto.SignUpRequestDto;
 import com.example.solidconnection.auth.dto.SignUpResponseDto;
 import com.example.solidconnection.auth.dto.kakao.KakaoCodeDto;
@@ -44,5 +45,11 @@ public class AuthController {
     public CustomResponse quit(Principal principal) {
         boolean status = authService.quit(principal.getName());
         return new StatusResponse(status);
+    }
+
+    @PostMapping("/reissue")
+    public CustomResponse reissue(Principal principal) {
+        ReissueResponseDto reissueResponseDto = authService.reissue(principal.getName());
+        return new DataResponse<>(reissueResponseDto);
     }
 }
