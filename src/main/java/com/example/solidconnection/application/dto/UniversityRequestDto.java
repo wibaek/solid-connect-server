@@ -11,5 +11,5 @@ import static com.example.solidconnection.constants.validMessage.FIRST_CHOICE_UN
 public class UniversityRequestDto {
     @NotNull(message = FIRST_CHOICE_UNIVERSITY_ID_NOT_BLANK)
     private Long firstChoiceUniversityId;
-    private Long secondChoiceUniversity;
+    private Long secondChoiceUniversityId;
 }
