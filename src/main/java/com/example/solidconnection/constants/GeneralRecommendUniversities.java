@@ -9,6 +9,8 @@ import org.springframework.stereotype.Component;
 import java.util.ArrayList;
 import java.util.List;
 
+import static com.example.solidconnection.constants.Constants.TERM;
+
 @Component
 @RequiredArgsConstructor
 public class GeneralRecommendUniversities {
@@ -27,12 +29,12 @@ public class GeneralRecommendUniversities {
     public void init() {
         recommendedUniversities = new ArrayList<>();
 
-        UniversityInfoForApply univ1 = universityInfoForApplyRepository.findByUniversity_KoreanName(RECOMMEND_UNIVERSITY_1).get();
-        UniversityInfoForApply univ2 = universityInfoForApplyRepository.findByUniversity_KoreanName(RECOMMEND_UNIVERSITY_2).get();
-        UniversityInfoForApply univ3 = universityInfoForApplyRepository.findByUniversity_KoreanName(RECOMMEND_UNIVERSITY_3).get();
-        UniversityInfoForApply univ4 = universityInfoForApplyRepository.findByUniversity_KoreanName(RECOMMEND_UNIVERSITY_4).get();
-        UniversityInfoForApply univ5 = universityInfoForApplyRepository.findByUniversity_KoreanName(RECOMMEND_UNIVERSITY_5).get();
-        UniversityInfoForApply univ6 = universityInfoForApplyRepository.findByUniversity_KoreanName(RECOMMEND_UNIVERSITY_6).get();
+        UniversityInfoForApply univ1 = universityInfoForApplyRepository.findByUniversity_KoreanNameAndTerm(RECOMMEND_UNIVERSITY_1, TERM).get();
+        UniversityInfoForApply univ2 = universityInfoForApplyRepository.findByUniversity_KoreanNameAndTerm(RECOMMEND_UNIVERSITY_2, TERM).get();
+        UniversityInfoForApply univ3 = universityInfoForApplyRepository.findByUniversity_KoreanNameAndTerm(RECOMMEND_UNIVERSITY_3, TERM).get();
+        UniversityInfoForApply univ4 = universityInfoForApplyRepository.findByUniversity_KoreanNameAndTerm(RECOMMEND_UNIVERSITY_4, TERM).get();
+        UniversityInfoForApply univ5 = universityInfoForApplyRepository.findByUniversity_KoreanNameAndTerm(RECOMMEND_UNIVERSITY_5, TERM).get();
+        UniversityInfoForApply univ6 = universityInfoForApplyRepository.findByUniversity_KoreanNameAndTerm(RECOMMEND_UNIVERSITY_6, TERM).get();
 
         recommendedUniversities.add(univ1);
         recommendedUniversities.add(univ2);
