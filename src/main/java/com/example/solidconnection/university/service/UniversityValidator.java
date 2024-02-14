@@ -8,6 +8,7 @@ import com.example.solidconnection.university.repository.UniversityRepository;
 import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Service;
 
+import static com.example.solidconnection.constants.Constants.TERM;
 import static com.example.solidconnection.custom.exception.ErrorCode.UNIVERSITY_INFO_FOR_APPLY_NOT_FOUND;
 import static com.example.solidconnection.custom.exception.ErrorCode.UNIVERSITY_NOT_FOUND;
 
@@ -18,7 +19,12 @@ public class UniversityValidator {
     private final UniversityRepository universityRepository;
 
     public UniversityInfoForApply getValidatedUniversityInfoForApplyById(Long id){
-        return universityInfoForApplyRepository.findById(id)
+        return universityInfoForApplyRepository.findByIdAndTerm(id, TERM)
+                .orElseThrow(() -> new CustomException(UNIVERSITY_INFO_FOR_APPLY_NOT_FOUND));
+    }
+
+    public UniversityInfoForApply getValidatedUniversityInfoForApplyByUniversity(University university){
+        return universityInfoForApplyRepository.findByUniversityAndTerm(university, TERM)
                 .orElseThrow(() -> new CustomException(UNIVERSITY_INFO_FOR_APPLY_NOT_FOUND));
     }
 

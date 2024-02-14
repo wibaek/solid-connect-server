@@ -1,5 +1,6 @@
 package com.example.solidconnection.university.service;
 
+import com.example.solidconnection.constants.GeneralRecommendUniversities;
 import com.example.solidconnection.entity.SiteUser;
 import com.example.solidconnection.entity.University;
 import com.example.solidconnection.entity.UniversityInfoForApply;
@@ -11,10 +12,11 @@ import com.example.solidconnection.type.CountryCode;
 import com.example.solidconnection.type.RegionCode;
 import com.example.solidconnection.university.dto.LanguageRequirementDto;
 import com.example.solidconnection.university.dto.UniversityDetailDto;
+import com.example.solidconnection.university.dto.UniversityPreviewDto;
 import com.example.solidconnection.university.repository.LanguageRequirementRepository;
 import com.example.solidconnection.university.repository.UniversityInfoForApplyRepository;
 import com.example.solidconnection.university.repository.UniversityRepository;
-import com.example.solidconnection.constants.GeneralRecommendUniversities;
+import com.example.solidconnection.university.repository.custom.UniversityRepositoryForFilterImpl;
 import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Service;
 
@@ -36,8 +38,9 @@ public class UniversityService {
     private final InterestedRegionRepository interestedRegionRepository;
     private final GeneralRecommendUniversities generalRecommendUniversities;
     private final UniversityValidator universityValidator;
+    private final UniversityRepositoryForFilterImpl universityRepositoryForFilter;
 
-    public List<RecommendedUniversityDto> getPersonalRecommends(String email){
+    public List<RecommendedUniversityDto> getPersonalRecommends(String email) {
         SiteUser siteUser = siteUserValidator.getValidatedSiteUserByEmail(email);
         List<CountryCode> interestedCountries = interestedCountyRepository.findAllBySiteUser(siteUser)
                 .stream().map(interestedCountry -> interestedCountry.getCountry().getCode())
@@ -46,27 +49,25 @@ public class UniversityService {
                 .stream().map(interestedRegion -> interestedRegion.getRegion().getCode())
                 .toList();
         List<UniversityInfoForApply> recommendedUniversities = new java.util.ArrayList<>(universityRepository.findByCountryCodeInOrRegionCodeIn(interestedCountries, interestedRegions)
-                .stream().map(university -> {
-                    return universityInfoForApplyRepository.findByUniversity(university).get();
-                })
+                .stream().map(universityValidator::getValidatedUniversityInfoForApplyByUniversity)
                 .toList());
 
         Collections.shuffle(recommendedUniversities);
         List<UniversityInfoForApply> shuffledList = recommendedUniversities.subList(0, Math.min(RECOMMEND_UNIVERSITY_NUM, recommendedUniversities.size()));
-        if(shuffledList.size() < 6){
+        if (shuffledList.size() < 6) {
             shuffledList.addAll(getGeneralRecommendsExcept(shuffledList));
         }
 
         return shuffledList.stream().map(RecommendedUniversityDto::fromEntity).collect(Collectors.toList());
     }
 
-    public List<RecommendedUniversityDto> getGeneralRecommends(){
+    public List<RecommendedUniversityDto> getGeneralRecommends() {
         List<UniversityInfoForApply> generalRecommend = new java.util.ArrayList<>(generalRecommendUniversities.getRecommendedUniversities());
         Collections.shuffle(generalRecommend);
         return generalRecommend.stream().map(RecommendedUniversityDto::fromEntity).collect(Collectors.toList());
     }
 
-    private List<UniversityInfoForApply> getGeneralRecommendsExcept(List<UniversityInfoForApply> alreadyPicked){
+    private List<UniversityInfoForApply> getGeneralRecommendsExcept(List<UniversityInfoForApply> alreadyPicked) {
         List<UniversityInfoForApply> generalRecommend = new java.util.ArrayList<>(generalRecommendUniversities.getRecommendedUniversities());
         generalRecommend.removeAll(alreadyPicked);
         int sizeToPick = RECOMMEND_UNIVERSITY_NUM - alreadyPicked.size();
@@ -74,7 +75,7 @@ public class UniversityService {
         return generalRecommend.subList(0, sizeToPick);
     }
 
-    public UniversityDetailDto getDetail(Long universityInfoForApplyId){
+    public UniversityDetailDto getDetail(Long universityInfoForApplyId) {
         UniversityInfoForApply universityInfoForApply = universityValidator.getValidatedUniversityInfoForApplyById(universityInfoForApplyId);
         University university = universityValidator.getValidatedUniversityById(universityInfoForApply.getUniversity().getId());
 
@@ -86,10 +87,10 @@ public class UniversityService {
 
         String countryKoreanName = null;
         String regionKoreanName = null;
-        if(university.getCountry() != null){
+        if (university.getCountry() != null) {
             countryKoreanName = university.getCountry().getCode().getKoreanName();
         }
-        if(university.getCountry() != null){
+        if (university.getCountry() != null) {
             regionKoreanName = university.getRegion().getCode().getKoreanName();
         }
 
@@ -124,4 +125,38 @@ public class UniversityService {
     }
 
 
+    public List<UniversityPreviewDto> search(String region, String keyword) {
+        RegionCode regionCode = null;
+        if (region != null && !region.isBlank()) {
+            regionCode = RegionCode.getRegionCodeByKoreanName(region);
+        }
+
+        List<CountryCode> countryCodes = null;
+        if (keyword != null && !keyword.isBlank()) {
+            countryCodes = CountryCode.getCountryCodeMatchesToKeyword(keyword);
+        }
+
+        List<University> universities = universityRepositoryForFilter.findByRegionAndKeyword(regionCode, countryCodes, keyword);
+        return universities.stream()
+                .map(university -> {
+                    UniversityInfoForApply universityInfoForApply = universityValidator.getValidatedUniversityInfoForApplyByUniversity(university);
+                    return makeUniversityPreviewDto(university, universityInfoForApply);
+                })
+                .toList();
+    }
+
+    private UniversityPreviewDto makeUniversityPreviewDto(University university, UniversityInfoForApply universityInfoForApply) {
+        return UniversityPreviewDto.builder()
+                .id(universityInfoForApply.getId())
+                .region(university.getRegion().getCode().getKoreanName())
+                .country(university.getCountry().getCode().getKoreanName())
+                .logoImageUrl(university.getLogoImageUrl())
+                .koreanName(university.getKoreanName())
+                .studentCapacity(universityInfoForApply.getStudentCapacity())
+                .languageRequirements(universityInfoForApply.getLanguageRequirements().stream()
+                        .map(LanguageRequirementDto::fromEntity)
+                        .toList()
+                )
+                .build();
+    }
 }
