@@ -136,7 +136,7 @@ public class UniversityService {
             countryCodes = CountryCode.getCountryCodeMatchesToKeyword(keyword);
         }
 
-        List<University> universities = universityRepositoryForFilter.findByRegionAndKeyword(regionCode, countryCodes, keyword);
+        List<University> universities = universityRepositoryForFilter.findByRegionAndCountryAndKeyword(regionCode, countryCodes, keyword);
         return universities.stream()
                 .map(university -> {
                     UniversityInfoForApply universityInfoForApply = universityValidator.getValidatedUniversityInfoForApplyByUniversity(university);

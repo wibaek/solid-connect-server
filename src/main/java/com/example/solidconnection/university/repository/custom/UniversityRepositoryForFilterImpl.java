@@ -25,7 +25,7 @@ public class UniversityRepositoryForFilterImpl implements UniversityRepositoryFo
     }
 
     @Override
-    public List<University> findByRegionAndKeyword(RegionCode regionCode, List<CountryCode> countryCodes, String keyword) {
+    public List<University> findByRegionAndCountryAndKeyword(RegionCode regionCode, List<CountryCode> countryCodes, String keyword) {
         QUniversity university = QUniversity.university;
         QCountry country = QCountry.country;
         QRegion region = QRegion.region;
@@ -54,10 +54,10 @@ public class UniversityRepositoryForFilterImpl implements UniversityRepositoryFo
             }
             return university.koreanName.contains(keyword); // 키워드에 해당하는 식을 반환
         }
-        // 해당하는 국가가 있으면,
-        if (keyword == null || keyword.isEmpty()) {
+
+        if (keyword == null || keyword.isEmpty()) { // 해당하는 국가가 있으면,
             return Expressions.asBoolean(true).isTrue();
         }
-        return country.code.in(countryCodes).or(university.koreanName.contains(keyword)); // 키워드에 해당하는 식을 반환
+        return country.code.in(countryCodes).or(university.koreanName.contains(keyword)); // 국가와 키워드에 해당하는 식을 반환
     }
 }
