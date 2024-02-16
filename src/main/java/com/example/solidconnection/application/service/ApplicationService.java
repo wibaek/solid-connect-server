@@ -20,6 +20,7 @@ import org.springframework.transaction.annotation.Transactional;
 
 import java.util.List;
 import java.util.Objects;
+import java.util.Optional;
 import java.util.Random;
 
 import static com.example.solidconnection.constants.Constants.APPLICATION_UPDATE_COUNT_LIMIT;
@@ -168,5 +169,17 @@ public class ApplicationService {
                             .build();
                 })
                 .toList();
+    }
+
+    public VerifyStatusDto getVerifyStatus(String email) {
+        SiteUser siteUser = siteUserValidator.getValidatedSiteUserByEmail(email);
+        Optional<Application> application = applicationRepository.findBySiteUser_Email(siteUser.getEmail());
+        if (application.isEmpty()) {
+            return new VerifyStatusDto("NOT_SUBMITTED");
+        }
+        if (application.get().getVerifyStatus() == VerifyStatus.APPROVED) {
+            return new VerifyStatusDto("SUBMITTED_APPROVED");
+        }
+        return new VerifyStatusDto("SUBMITTED_NOT_APPROVED");
     }
 }
