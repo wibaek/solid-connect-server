@@ -37,6 +37,7 @@ public class JwtAuthenticationFilter extends OncePerRequestFilter {
     protected void doFilterInternal(HttpServletRequest request, HttpServletResponse response, FilterChain filterChain)
             throws ServletException, IOException {
 
+        // 인증 정보를 저장할 필요 없는 url
         AntPathMatcher pathMatcher = new AntPathMatcher();
         for (String endpoint : getPermitAllEndpoints()) {
             if (pathMatcher.match(endpoint, request.getRequestURI())) {
@@ -45,10 +46,18 @@ public class JwtAuthenticationFilter extends OncePerRequestFilter {
             }
         }
 
+        // 토큰 검증
         try {
             String token = this.resolveAccessTokenFromRequest(request); // 웹 요청에서 토큰 추출
             if (token != null) { // 토큰이 있어야 검증 - 토큰 유무에 대한 다른 처리를 컨트롤러에서 할 수 있음
                 try {
+                    String requestURI = request.getRequestURI();
+                    if(requestURI.equals("/auth/reissue")) {
+                        Authentication auth = this.tokenService.getAuthentication(token);
+                        SecurityContextHolder.getContext().setAuthentication(auth);
+                        filterChain.doFilter(request, response);
+                        return;
+                    }
                     tokenValidator.validateAccessToken(token); // 액세스 토큰 검증 - 비어있는지, 유효한지, 리프레시 토큰, 로그아웃
                 } catch (ExpiredJwtException e) {
                     throw new JwtExpiredTokenException(ACCESS_TOKEN_EXPIRED.getMessage());
@@ -63,8 +72,10 @@ public class JwtAuthenticationFilter extends OncePerRequestFilter {
         } catch (AuthenticationException e) {
             SecurityContextHolder.clearContext();
             jwtAuthenticationEntryPoint.commence(request, response, e);
+            return;
         } catch (CustomException e) {
             jwtAuthenticationEntryPoint.customCommence(request, response, e);
+            return;
         }
         filterChain.doFilter(request, response); // 다음 필터로 요청과 응답 전달
     }
@@ -94,7 +105,6 @@ public class JwtAuthenticationFilter extends OncePerRequestFilter {
         permitAllEndpoints.add("/auth/sign-up");
 
         // 대학교 정보
-        permitAllEndpoints.add("/university/detail/**");
         permitAllEndpoints.add("/university/search/**");
 
         return permitAllEndpoints;

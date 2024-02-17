@@ -49,7 +49,7 @@ public class SecurityConfiguration {
                         .requestMatchers(
                                 "/", "/index.html", "/favicon.ico",
                                 "/img/profile/pre",
-                                "/auth/kakao",  "/auth/sign-up",
+                                "/auth/kakao",  "/auth/sign-up", "/auth/reissue",
                                 "/university/detail/**", "/university/search/**", "/home"
                                 )
                         .permitAll()
