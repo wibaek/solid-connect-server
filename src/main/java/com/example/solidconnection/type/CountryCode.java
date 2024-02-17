@@ -35,7 +35,12 @@ public enum CountryCode {
     FR("프랑스"),
     FI("핀란드"),
     CN("중국"),
-    TW("대만");
+    TW("대만"),
+    HU("헝가리"),
+    LT("리투아니아"),
+    TH("태국"),
+    UZ("우즈베키스탄")
+    ;
 
     private final String koreanName;
 
