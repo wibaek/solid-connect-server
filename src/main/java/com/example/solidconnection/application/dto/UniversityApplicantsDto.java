@@ -12,5 +12,7 @@ import java.util.List;
 public class UniversityApplicantsDto {
     private String koreanName;
     private int studentCapacity;
+    private String region;
+    private String country;
     private List<ApplicantDto> applicants;
 }
