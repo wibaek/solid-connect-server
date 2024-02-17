@@ -12,6 +12,7 @@ import com.example.solidconnection.siteuser.service.SiteUserValidator;
 import com.example.solidconnection.type.CountryCode;
 import com.example.solidconnection.type.RegionCode;
 import com.example.solidconnection.type.VerifyStatus;
+import com.example.solidconnection.university.repository.UniversityInfoForApplyRepository;
 import com.example.solidconnection.university.repository.custom.UniversityRepositoryForFilterImpl;
 import com.example.solidconnection.university.service.UniversityValidator;
 import lombok.RequiredArgsConstructor;
@@ -24,6 +25,7 @@ import java.util.Optional;
 import java.util.Random;
 
 import static com.example.solidconnection.constants.Constants.APPLICATION_UPDATE_COUNT_LIMIT;
+import static com.example.solidconnection.constants.Constants.TERM;
 import static com.example.solidconnection.custom.exception.ErrorCode.*;
 
 @Service
@@ -31,6 +33,7 @@ import static com.example.solidconnection.custom.exception.ErrorCode.*;
 @Transactional
 public class ApplicationService {
     private final ApplicationRepository applicationRepository;
+    private final UniversityInfoForApplyRepository universityInfoForApplyRepository;
     private final UniversityValidator universityValidator;
     private final SiteUserValidator siteUserValidator;
     private final ApplicationValidator applicationValidator;
@@ -139,6 +142,7 @@ public class ApplicationService {
 
     private List<UniversityApplicantsDto> getFirstChoiceApplicants(List<University> universities, SiteUser siteUser) {
         return universities.stream()
+                .filter(university -> universityInfoForApplyRepository.existsByUniversityAndTerm(university, TERM))
                 .map(university -> {
                     UniversityInfoForApply universityInfoForApply = universityValidator.getValidatedUniversityInfoForApplyByUniversity(university);
                     List<Application> firstChoiceApplication = applicationRepository.findAllByFirstChoiceUniversityAndVerifyStatus(universityInfoForApply, VerifyStatus.APPROVED);
@@ -148,6 +152,8 @@ public class ApplicationService {
                     return UniversityApplicantsDto.builder()
                             .koreanName(university.getKoreanName())
                             .studentCapacity(universityInfoForApply.getStudentCapacity())
+                            .region(university.getRegion().getCode().getKoreanName())
+                            .country(university.getCountry().getCode().getKoreanName())
                             .applicants(firstChoiceApplicant)
                             .build();
                 })
@@ -156,6 +162,7 @@ public class ApplicationService {
 
     private List<UniversityApplicantsDto> getSecondChoiceApplicants(List<University> universities, SiteUser siteUser) {
         return universities.stream()
+                .filter(university -> universityInfoForApplyRepository.existsByUniversityAndTerm(university, TERM))
                 .map(university -> {
                     UniversityInfoForApply universityInfoForApply = universityValidator.getValidatedUniversityInfoForApplyByUniversity(university);
                     List<Application> secondChoiceApplication = applicationRepository.findAllBySecondChoiceUniversityAndVerifyStatus(universityInfoForApply, VerifyStatus.APPROVED);
@@ -165,6 +172,8 @@ public class ApplicationService {
                     return UniversityApplicantsDto.builder()
                             .koreanName(university.getKoreanName())
                             .studentCapacity(universityInfoForApply.getStudentCapacity())
+                            .region(university.getRegion().getCode().getKoreanName())
+                            .country(university.getCountry().getCode().getKoreanName())
                             .applicants(secondChoiceApplicant)
                             .build();
                 })
