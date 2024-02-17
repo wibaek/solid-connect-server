@@ -3,6 +3,7 @@ package com.example.solidconnection.config.token;
 import com.example.solidconnection.custom.userdetails.CustomUserDetailsService;
 import com.example.solidconnection.siteuser.repository.SiteUserRepository;
 import io.jsonwebtoken.Claims;
+import io.jsonwebtoken.ExpiredJwtException;
 import io.jsonwebtoken.Jwts;
 import io.jsonwebtoken.SignatureAlgorithm;
 import lombok.RequiredArgsConstructor;
@@ -58,9 +59,13 @@ public class TokenService {
     }
 
     private Claims getClaim(String token) {
-        return Jwts.parser()
-                .setSigningKey(this.secretKey)
-                .parseClaimsJws(token)
-                .getBody();
+        try {
+            return Jwts.parser()
+                    .setSigningKey(secretKey)
+                    .parseClaimsJws(token)
+                    .getBody();
+        } catch (ExpiredJwtException e) {
+            return e.getClaims();
+        }
     }
 }

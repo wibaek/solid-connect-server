@@ -1,17 +1,21 @@
 package com.example.solidconnection.siteuser.service;
 
 import com.example.solidconnection.custom.exception.CustomException;
+import com.example.solidconnection.entity.LikedUniversity;
 import com.example.solidconnection.entity.SiteUser;
 import com.example.solidconnection.siteuser.dto.MyPageDto;
 import com.example.solidconnection.siteuser.dto.MyPageUpdateDto;
 import com.example.solidconnection.siteuser.repository.LikedUniversityRepository;
 import com.example.solidconnection.siteuser.repository.SiteUserRepository;
+import com.example.solidconnection.university.dto.UniversityPreviewDto;
+import com.example.solidconnection.university.repository.UniversityInfoForApplyRepository;
 import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
 import java.time.LocalDateTime;
 import java.time.format.DateTimeFormatter;
+import java.util.List;
 
 import static com.example.solidconnection.constants.Constants.MIN_DAYS_BETWEEN_NICKNAME_CHANGES;
 import static com.example.solidconnection.custom.exception.ErrorCode.CAN_NOT_CHANGE_NICKNAME_YET;
@@ -23,6 +27,7 @@ public class MyPageService {
     private final SiteUserValidator siteUserValidator;
     private final SiteUserRepository siteUserRepository;
     private final LikedUniversityRepository likedUniversityRepository;
+    private final UniversityInfoForApplyRepository universityInfoForApplyRepository;
 
     public MyPageDto getMyPageInfo(String email) {
         SiteUser siteUser = siteUserValidator.getValidatedSiteUserByEmail(email);
@@ -60,5 +65,13 @@ public class MyPageService {
             String formatLastModifiedAt = String.format("(마지막 수정 시간 : %s) ", formatter.format(lastModifiedAt));
             throw new CustomException(CAN_NOT_CHANGE_NICKNAME_YET, formatLastModifiedAt);
         }
+    }
+
+    public List<UniversityPreviewDto> getWishUniversity(String email) {
+        SiteUser siteUser = siteUserValidator.getValidatedSiteUserByEmail(email);
+        List<LikedUniversity> likedUniversities = likedUniversityRepository.findAllBySiteUser_Email(siteUser.getEmail());
+        return likedUniversities.stream()
+                .map(likedUniversity -> UniversityPreviewDto.fromEntity(likedUniversity.getUniversityInfoForApply()))
+                .toList();
     }
 }
