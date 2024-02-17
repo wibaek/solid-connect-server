@@ -9,6 +9,7 @@ import static com.example.solidconnection.constants.Constants.MIN_DAYS_BETWEEN_N
 @Getter
 @AllArgsConstructor
 public enum ErrorCode {
+    INVALID_TEST_TYPE(HttpStatus.BAD_REQUEST.value(), "지원하지 않은 어학 시험 종류입니다."),
     APPLICATION_NOT_APPROVED(HttpStatus.BAD_REQUEST.value(), "성적표가 인증되지 않았습니다."),
     APPLY_UPDATE_LIMIT_EXCEED(HttpStatus.BAD_REQUEST.value(), "지원 정보 수정은 3회까지만 가능합니다."),
     CANT_APPLY_FOR_SAME_UNIVERSITY(HttpStatus.BAD_REQUEST.value(), "1, 2지망에 동일한 대학교를 입력할 수 없습니다."),

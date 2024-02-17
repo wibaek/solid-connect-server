@@ -126,10 +126,10 @@ public class ApplicationService {
         }
         List<CountryCode> countryCodes = null;
         if (keyword != null && !keyword.isBlank()) {
-            countryCodes = CountryCode.getCountryCodeMatchesToKeyword(keyword);
+            countryCodes = CountryCode.getCountryCodeMatchesToKeyword(List.of(keyword));
         }
 
-        List<University> universities = universityRepositoryForFilter.findByRegionAndCountryAndKeyword(regionCode, countryCodes, keyword);
+        List<University> universities = universityRepositoryForFilter.findByRegionAndCountryAndKeyword(regionCode, countryCodes, List.of(keyword));
         List<UniversityApplicantsDto> firstChoiceApplicants = getFirstChoiceApplicants(universities, siteUser);
         List<UniversityApplicantsDto> secondChoiceApplicants = getSecondChoiceApplicants(universities, siteUser);
         return ApplicationsDto.builder()

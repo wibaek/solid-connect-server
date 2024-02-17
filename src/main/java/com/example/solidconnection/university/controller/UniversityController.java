@@ -2,6 +2,7 @@ package com.example.solidconnection.university.controller;
 
 import com.example.solidconnection.custom.response.CustomResponse;
 import com.example.solidconnection.custom.response.DataResponse;
+import com.example.solidconnection.type.LanguageTestType;
 import com.example.solidconnection.university.dto.LikedResultDto;
 import com.example.solidconnection.university.dto.UniversityDetailDto;
 import com.example.solidconnection.university.dto.UniversityPreviewDto;
@@ -31,13 +32,15 @@ public class UniversityController {
 
     @GetMapping("/search")
     public CustomResponse search(@RequestParam(required = false, defaultValue = "") String region,
-                                 @RequestParam(required = false, defaultValue = "") String keyword){
-        List<UniversityPreviewDto> universityPreviewDto = universityService.search(region, keyword);
+                                 @RequestParam(required = false, defaultValue = "") List<String> keyword,
+                                 @RequestParam(required = false, defaultValue = "") String testType,
+                                 @RequestParam(required = false, defaultValue = "") String testScore) {
+        List<UniversityPreviewDto> universityPreviewDto = universityService.search(region, keyword, LanguageTestType.getLanguageTestTypeForString(testType), testScore);
         return new DataResponse<>(universityPreviewDto);
     }
 
     @PostMapping("/{universityInfoForApplyId}/like")
-    public CustomResponse like(Principal principal, @PathVariable Long universityInfoForApplyId){
+    public CustomResponse like(Principal principal, @PathVariable Long universityInfoForApplyId) {
         LikedResultDto likedResultDto = universityService.like(principal.getName(), universityInfoForApplyId);
         return new DataResponse<>(likedResultDto);
     }

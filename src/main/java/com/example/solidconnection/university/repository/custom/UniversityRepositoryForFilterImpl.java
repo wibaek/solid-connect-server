@@ -25,17 +25,21 @@ public class UniversityRepositoryForFilterImpl implements UniversityRepositoryFo
     }
 
     @Override
-    public List<University> findByRegionAndCountryAndKeyword(RegionCode regionCode, List<CountryCode> countryCodes, String keyword) {
+    public List<University> findByRegionAndCountryAndKeyword(RegionCode regionCode, List<CountryCode> countryCodes, List<String> keywords) {
         QUniversity university = QUniversity.university;
         QCountry country = QCountry.country;
         QRegion region = QRegion.region;
+
+        System.out.println(keywords);
+        System.out.println(countryCodes);
+        System.out.println(regionCodeEq(regionCode, region).and(keywordContainsInCountryOrName(countryCodes, country, keywords, university)));
 
         return queryFactory
                 .selectFrom(university)
                 .join(university.country, country)
                 .join(country.region, region)
                 .where(
-                        regionCodeEq(regionCode, region).and(keywordContainsInCountryOrName(countryCodes, country, keyword, university))
+                        regionCodeEq(regionCode, region).and(keywordContainsInCountryOrName(countryCodes, country, keywords, university))
                 )
                 .fetch();
     }
@@ -47,17 +51,26 @@ public class UniversityRepositoryForFilterImpl implements UniversityRepositoryFo
         return region.code.eq(regionCode);
     }
 
-    private BooleanExpression keywordContainsInCountryOrName(List<CountryCode> countryCodes, QCountry country, String keyword, QUniversity university) {
+    private BooleanExpression keywordContainsInCountryOrName(List<CountryCode> countryCodes, QCountry country, List<String> keywords, QUniversity university) {
         if (countryCodes == null || countryCodes.isEmpty()) { // 해당하는 국가가 없으면
-            if (keyword == null || keyword.isEmpty()) {
+            if (keywords == null || keywords.isEmpty()) {
                 return Expressions.asBoolean(true).isTrue();
             }
-            return university.koreanName.contains(keyword); // 키워드에 해당하는 식을 반환
+            return keywords.stream()
+                    .map(university.koreanName::contains)
+                    .reduce(BooleanExpression::or)
+                    .orElse(Expressions.asBoolean(true).isFalse());
         }
 
-        if (keyword == null || keyword.isEmpty()) { // 해당하는 국가가 있으면,
+        BooleanExpression countryCondition = country.code.in(countryCodes);
+        if (keywords == null || keywords.isEmpty()) {
             return Expressions.asBoolean(true).isTrue();
         }
-        return country.code.in(countryCodes).or(university.koreanName.contains(keyword)); // 국가와 키워드에 해당하는 식을 반환
+
+        BooleanExpression keywordCondition = keywords.stream()
+                .map(university.koreanName::contains)
+                .reduce(BooleanExpression::or)
+                .orElse(Expressions.asBoolean(true).isFalse());
+        return countryCondition.or(keywordCondition);
     }
 }

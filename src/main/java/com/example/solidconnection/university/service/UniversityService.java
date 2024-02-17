@@ -1,16 +1,14 @@
 package com.example.solidconnection.university.service;
 
 import com.example.solidconnection.constants.GeneralRecommendUniversities;
-import com.example.solidconnection.entity.LikedUniversity;
-import com.example.solidconnection.entity.SiteUser;
-import com.example.solidconnection.entity.University;
-import com.example.solidconnection.entity.UniversityInfoForApply;
+import com.example.solidconnection.entity.*;
 import com.example.solidconnection.home.dto.RecommendedUniversityDto;
 import com.example.solidconnection.repositories.InterestedCountyRepository;
 import com.example.solidconnection.repositories.InterestedRegionRepository;
 import com.example.solidconnection.siteuser.repository.LikedUniversityRepository;
 import com.example.solidconnection.siteuser.service.SiteUserValidator;
 import com.example.solidconnection.type.CountryCode;
+import com.example.solidconnection.type.LanguageTestType;
 import com.example.solidconnection.type.RegionCode;
 import com.example.solidconnection.university.dto.LanguageRequirementDto;
 import com.example.solidconnection.university.dto.LikedResultDto;
@@ -131,20 +129,24 @@ public class UniversityService {
     }
 
 
-    public List<UniversityPreviewDto> search(String region, String keyword) {
+    public List<UniversityPreviewDto> search(String region, List<String> keywords, LanguageTestType testType, String testScore) {
         RegionCode regionCode = null;
         if (region != null && !region.isBlank()) {
             regionCode = RegionCode.getRegionCodeByKoreanName(region);
         }
 
         List<CountryCode> countryCodes = null;
-        if (keyword != null && !keyword.isBlank()) {
-            countryCodes = CountryCode.getCountryCodeMatchesToKeyword(keyword);
+        if (keywords != null && !keywords.isEmpty()) {
+            countryCodes = CountryCode.getCountryCodeMatchesToKeyword(keywords);
         }
 
-        List<University> universities = universityRepositoryForFilter.findByRegionAndCountryAndKeyword(regionCode, countryCodes, keyword);
+        List<University> universities = universityRepositoryForFilter.findByRegionAndCountryAndKeyword(regionCode, countryCodes, keywords);
         return universities.stream()
                 .filter(university -> universityInfoForApplyRepository.existsByUniversityAndTerm(university, TERM))
+                .filter(university -> {
+                    UniversityInfoForApply universityInfoForApply = universityValidator.getValidatedUniversityInfoForApplyByUniversity(university);
+                    return languageRequirementRepository.findByUniversityInfoForApplyAndLanguageTestTypeAndLessThanMyScore(universityInfoForApply, testType, testScore).isPresent();
+                })
                 .map(university -> {
                     UniversityInfoForApply universityInfoForApply = universityValidator.getValidatedUniversityInfoForApplyByUniversity(university);
                     return UniversityPreviewDto.fromEntity(universityInfoForApply);
