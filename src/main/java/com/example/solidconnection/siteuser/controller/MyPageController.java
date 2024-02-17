@@ -6,11 +6,13 @@ import com.example.solidconnection.custom.response.StatusResponse;
 import com.example.solidconnection.siteuser.dto.MyPageDto;
 import com.example.solidconnection.siteuser.dto.MyPageUpdateDto;
 import com.example.solidconnection.siteuser.service.MyPageService;
+import com.example.solidconnection.university.dto.UniversityPreviewDto;
 import jakarta.validation.Valid;
 import lombok.RequiredArgsConstructor;
 import org.springframework.web.bind.annotation.*;
 
 import java.security.Principal;
+import java.util.List;
 
 @RestController
 @RequestMapping("/my-page")
@@ -34,5 +36,11 @@ class MyPageController {
     public CustomResponse update(Principal principal, @Valid @RequestBody MyPageUpdateDto myPageUpdateDto) {
         myPageService.update(principal.getName(), myPageUpdateDto);
         return new StatusResponse(true);
+    }
+
+    @GetMapping("/wish-university")
+    public CustomResponse getWishUniversity(Principal principal) {
+        List<UniversityPreviewDto> wishUniversities = myPageService.getWishUniversity(principal.getName());
+        return new DataResponse<>(wishUniversities);
     }
 }

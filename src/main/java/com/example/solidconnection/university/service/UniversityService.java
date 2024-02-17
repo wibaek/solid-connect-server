@@ -1,16 +1,19 @@
 package com.example.solidconnection.university.service;
 
 import com.example.solidconnection.constants.GeneralRecommendUniversities;
+import com.example.solidconnection.entity.LikedUniversity;
 import com.example.solidconnection.entity.SiteUser;
 import com.example.solidconnection.entity.University;
 import com.example.solidconnection.entity.UniversityInfoForApply;
 import com.example.solidconnection.home.dto.RecommendedUniversityDto;
 import com.example.solidconnection.repositories.InterestedCountyRepository;
 import com.example.solidconnection.repositories.InterestedRegionRepository;
+import com.example.solidconnection.siteuser.repository.LikedUniversityRepository;
 import com.example.solidconnection.siteuser.service.SiteUserValidator;
 import com.example.solidconnection.type.CountryCode;
 import com.example.solidconnection.type.RegionCode;
 import com.example.solidconnection.university.dto.LanguageRequirementDto;
+import com.example.solidconnection.university.dto.LikedResultDto;
 import com.example.solidconnection.university.dto.UniversityDetailDto;
 import com.example.solidconnection.university.dto.UniversityPreviewDto;
 import com.example.solidconnection.university.repository.LanguageRequirementRepository;
@@ -22,6 +25,7 @@ import org.springframework.stereotype.Service;
 
 import java.util.Collections;
 import java.util.List;
+import java.util.Optional;
 import java.util.stream.Collectors;
 
 import static com.example.solidconnection.constants.Constants.RECOMMEND_UNIVERSITY_NUM;
@@ -33,9 +37,10 @@ public class UniversityService {
     private final UniversityInfoForApplyRepository universityInfoForApplyRepository;
     private final UniversityRepository universityRepository;
     private final LanguageRequirementRepository languageRequirementRepository;
-    private final SiteUserValidator siteUserValidator;
     private final InterestedCountyRepository interestedCountyRepository;
     private final InterestedRegionRepository interestedRegionRepository;
+    private final LikedUniversityRepository likedUniversityRepository;
+    private final SiteUserValidator siteUserValidator;
     private final GeneralRecommendUniversities generalRecommendUniversities;
     private final UniversityValidator universityValidator;
     private final UniversityRepositoryForFilterImpl universityRepositoryForFilter;
@@ -140,23 +145,30 @@ public class UniversityService {
         return universities.stream()
                 .map(university -> {
                     UniversityInfoForApply universityInfoForApply = universityValidator.getValidatedUniversityInfoForApplyByUniversity(university);
-                    return makeUniversityPreviewDto(university, universityInfoForApply);
+                    return UniversityPreviewDto.fromEntity(universityInfoForApply);
                 })
                 .toList();
     }
 
-    private UniversityPreviewDto makeUniversityPreviewDto(University university, UniversityInfoForApply universityInfoForApply) {
-        return UniversityPreviewDto.builder()
-                .id(universityInfoForApply.getId())
-                .region(university.getRegion().getCode().getKoreanName())
-                .country(university.getCountry().getCode().getKoreanName())
-                .logoImageUrl(university.getLogoImageUrl())
-                .koreanName(university.getKoreanName())
-                .studentCapacity(universityInfoForApply.getStudentCapacity())
-                .languageRequirements(universityInfoForApply.getLanguageRequirements().stream()
-                        .map(LanguageRequirementDto::fromEntity)
-                        .toList()
-                )
+    public LikedResultDto like(String email, Long universityInfoForApplyId) {
+        SiteUser siteUser = siteUserValidator.getValidatedSiteUserByEmail(email);
+        UniversityInfoForApply universityInfoForApply = universityValidator.getValidatedUniversityInfoForApplyById(universityInfoForApplyId);
+
+        Optional<LikedUniversity> alreadyLikedUniversity = likedUniversityRepository.findBySiteUserAndUniversityInfoForApply(siteUser, universityInfoForApply);
+        if (alreadyLikedUniversity.isPresent()) {
+            likedUniversityRepository.delete(alreadyLikedUniversity.get());
+            return LikedResultDto.builder()
+                    .result("LIKE_CANCELED")
+                    .build();
+        }
+
+        LikedUniversity likedUniversity = LikedUniversity.builder()
+                .universityInfoForApply(universityInfoForApply)
+                .siteUser(siteUser)
+                .build();
+        likedUniversityRepository.save(likedUniversity);
+        return LikedResultDto.builder()
+                .result("LIKE_SUCCESS")
                 .build();
     }
 }
