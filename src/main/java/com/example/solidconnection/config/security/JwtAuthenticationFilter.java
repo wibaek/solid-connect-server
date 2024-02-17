@@ -98,7 +98,7 @@ public class JwtAuthenticationFilter extends OncePerRequestFilter {
         permitAllEndpoints.add("/favicon.ico");
 
         // 이미지 업로드
-        permitAllEndpoints.add("/img/profile/pre");
+        permitAllEndpoints.add("/file/profile/pre");
 
         // 토큰이 필요하지 않은 인증
         permitAllEndpoints.add("/auth/kakao");
