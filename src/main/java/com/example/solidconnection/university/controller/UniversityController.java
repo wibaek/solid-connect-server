@@ -2,7 +2,6 @@ package com.example.solidconnection.university.controller;
 
 import com.example.solidconnection.custom.response.CustomResponse;
 import com.example.solidconnection.custom.response.DataResponse;
-import com.example.solidconnection.type.LanguageTestType;
 import com.example.solidconnection.university.dto.LikedResultDto;
 import com.example.solidconnection.university.dto.UniversityDetailDto;
 import com.example.solidconnection.university.dto.UniversityPreviewDto;
@@ -35,7 +34,7 @@ public class UniversityController {
                                  @RequestParam(required = false, defaultValue = "") List<String> keyword,
                                  @RequestParam(required = false, defaultValue = "") String testType,
                                  @RequestParam(required = false, defaultValue = "") String testScore) {
-        List<UniversityPreviewDto> universityPreviewDto = universityService.search(region, keyword, LanguageTestType.getLanguageTestTypeForString(testType), testScore);
+        List<UniversityPreviewDto> universityPreviewDto = universityService.search(region, keyword, testType, testScore);
         return new DataResponse<>(universityPreviewDto);
     }
 

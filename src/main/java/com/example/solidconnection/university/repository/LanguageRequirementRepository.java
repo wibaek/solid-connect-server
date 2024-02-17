@@ -17,4 +17,6 @@ public interface LanguageRequirementRepository extends JpaRepository<LanguageReq
 
     @Query("SELECT lr FROM LanguageRequirement lr WHERE lr.minScore <= :myScore AND lr.languageTestType = :testType AND lr.universityInfoForApply = :universityInfoForApply ORDER BY lr.minScore ASC")
     Optional<LanguageRequirement> findByUniversityInfoForApplyAndLanguageTestTypeAndLessThanMyScore(@Param("universityInfoForApply") UniversityInfoForApply universityInfoForApply, @Param("testType") LanguageTestType testType, @Param("myScore") String myScore);
+
+    boolean existsByUniversityInfoForApplyAndLanguageTestType(UniversityInfoForApply universityInfoForApply, LanguageTestType languageTestType);
 }

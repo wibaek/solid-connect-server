@@ -1,7 +1,10 @@
 package com.example.solidconnection.university.service;
 
 import com.example.solidconnection.constants.GeneralRecommendUniversities;
-import com.example.solidconnection.entity.*;
+import com.example.solidconnection.entity.LikedUniversity;
+import com.example.solidconnection.entity.SiteUser;
+import com.example.solidconnection.entity.University;
+import com.example.solidconnection.entity.UniversityInfoForApply;
 import com.example.solidconnection.home.dto.RecommendedUniversityDto;
 import com.example.solidconnection.repositories.InterestedCountyRepository;
 import com.example.solidconnection.repositories.InterestedRegionRepository;
@@ -129,7 +132,7 @@ public class UniversityService {
     }
 
 
-    public List<UniversityPreviewDto> search(String region, List<String> keywords, LanguageTestType testType, String testScore) {
+    public List<UniversityPreviewDto> search(String region, List<String> keywords, String testType, String testScore) {
         RegionCode regionCode = null;
         if (region != null && !region.isBlank()) {
             regionCode = RegionCode.getRegionCodeByKoreanName(region);
@@ -145,7 +148,14 @@ public class UniversityService {
                 .filter(university -> universityInfoForApplyRepository.existsByUniversityAndTerm(university, TERM))
                 .filter(university -> {
                     UniversityInfoForApply universityInfoForApply = universityValidator.getValidatedUniversityInfoForApplyByUniversity(university);
-                    return languageRequirementRepository.findByUniversityInfoForApplyAndLanguageTestTypeAndLessThanMyScore(universityInfoForApply, testType, testScore).isPresent();
+                    if (!testType.isBlank()) {
+                        LanguageTestType languageTestType = LanguageTestType.getLanguageTestTypeForString(testType);
+                        if (!testScore.isBlank()) {
+                            return languageRequirementRepository.findByUniversityInfoForApplyAndLanguageTestTypeAndLessThanMyScore(universityInfoForApply, languageTestType, testScore).isPresent();
+                        }
+                        return languageRequirementRepository.existsByUniversityInfoForApplyAndLanguageTestType(universityInfoForApply, languageTestType);
+                    }
+                    return true;
                 })
                 .map(university -> {
                     UniversityInfoForApply universityInfoForApply = universityValidator.getValidatedUniversityInfoForApplyByUniversity(university);
