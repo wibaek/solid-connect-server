@@ -48,7 +48,7 @@ public class SecurityConfiguration {
                         -> authorizeRequest
                         .requestMatchers(
                                 "/", "/index.html", "/favicon.ico",
-                                "/img/profile/pre",
+                                "/file/profile/pre",
                                 "/auth/kakao",  "/auth/sign-up", "/auth/reissue",
                                 "/university/detail/**", "/university/search/**", "/home"
                                 )
