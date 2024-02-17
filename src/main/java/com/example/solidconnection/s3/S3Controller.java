@@ -14,32 +14,32 @@ import java.security.Principal;
 
 @RequiredArgsConstructor
 @RestController
-@RequestMapping("/img")
+@RequestMapping("/file")
 public class S3Controller {
     private final S3Service s3Service;
 
     @PostMapping("/profile/pre")
-    public CustomResponse uploadPreProfileImage(@RequestParam("imageFile") MultipartFile imageFile) {
-        ImageUrlDto profileImageUrl = s3Service.uploadImgFile(imageFile, ImgType.PROFILE);
+    public CustomResponse uploadPreProfileImage(@RequestParam("file") MultipartFile imageFile) {
+        UploadedFileURLDto profileImageUrl = s3Service.uploadFile(imageFile, ImgType.PROFILE);
         return new DataResponse<>(profileImageUrl);
     }
 
     @PostMapping("/profile/post")
-    public CustomResponse uploadPostProfileImage(@RequestParam("imageFile") MultipartFile imageFile, Principal principal) {
-        ImageUrlDto profileImageUrl = s3Service.uploadImgFile(imageFile, ImgType.PROFILE);
+    public CustomResponse uploadPostProfileImage(@RequestParam("file") MultipartFile imageFile, Principal principal) {
+        UploadedFileURLDto profileImageUrl = s3Service.uploadFile(imageFile, ImgType.PROFILE);
         s3Service.deleteExProfile(principal.getName());
         return new DataResponse<>(profileImageUrl);
     }
 
     @PostMapping("/gpa")
-    public CustomResponse uploadGpaImage(@RequestParam("imageFile") MultipartFile imageFile) {
-        ImageUrlDto profileImageUrl = s3Service.uploadImgFile(imageFile, ImgType.GPA);
+    public CustomResponse uploadGpaImage(@RequestParam("file") MultipartFile imageFile) {
+        UploadedFileURLDto profileImageUrl = s3Service.uploadFile(imageFile, ImgType.GPA);
         return new DataResponse<>(profileImageUrl);
     }
 
     @PostMapping("/language-test")
-    public CustomResponse uploadLanguageImage(@RequestParam("imageFile") MultipartFile imageFile) {
-        ImageUrlDto profileImageUrl = s3Service.uploadImgFile(imageFile, ImgType.LANGUAGE_TEST);
+    public CustomResponse uploadLanguageImage(@RequestParam("file") MultipartFile imageFile) {
+        UploadedFileURLDto profileImageUrl = s3Service.uploadFile(imageFile, ImgType.LANGUAGE_TEST);
         return new DataResponse<>(profileImageUrl);
     }
 }

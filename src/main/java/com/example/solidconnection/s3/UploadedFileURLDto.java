@@ -6,6 +6,6 @@ import lombok.*;
 @Setter
 @NoArgsConstructor
 @AllArgsConstructor
-public class ImageUrlDto {
-    private String imageUrl;
+public class UploadedFileURLDto {
+    private String fileUrl;
 }
