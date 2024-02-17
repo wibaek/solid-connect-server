@@ -34,10 +34,10 @@ public class UniversityInfoForApply {
     @Column(length = 1000)
     private String detailsForLanguage;
 
-    @Column(length = 5)
+    @Column(length = 20)
     private String gpaRequirement;
 
-    @Column(length = 5)
+    @Column(length = 20)
     private String gpaRequirementCriteria;
 
     @Column(length = 1000)
