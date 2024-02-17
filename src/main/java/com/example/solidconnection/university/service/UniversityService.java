@@ -171,4 +171,11 @@ public class UniversityService {
                 .result("LIKE_SUCCESS")
                 .build();
     }
+
+    public boolean getIsLiked(String email, Long universityInfoForApplyId) {
+        SiteUser siteUser = siteUserValidator.getValidatedSiteUserByEmail(email);
+        UniversityInfoForApply universityInfoForApply = universityValidator.getValidatedUniversityInfoForApplyById(universityInfoForApplyId);
+        return likedUniversityRepository.findBySiteUserAndUniversityInfoForApply(siteUser, universityInfoForApply)
+                .isPresent();
+    }
 }

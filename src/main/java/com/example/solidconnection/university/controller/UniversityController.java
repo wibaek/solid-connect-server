@@ -20,8 +20,12 @@ public class UniversityController {
     private final UniversityService universityService;
 
     @GetMapping("/detail/{universityInfoForApplyId}")
-    public CustomResponse getDetails(@PathVariable Long universityInfoForApplyId) {
+    public CustomResponse getDetails(Principal principal, @PathVariable Long universityInfoForApplyId) {
         UniversityDetailDto universityDetailDto = universityService.getDetail(universityInfoForApplyId);
+        if (principal != null) {
+            boolean isLiked = universityService.getIsLiked(principal.getName(), universityInfoForApplyId);
+            universityDetailDto.setLiked(isLiked);
+        }
         return new DataResponse<>(universityDetailDto);
     }
 
