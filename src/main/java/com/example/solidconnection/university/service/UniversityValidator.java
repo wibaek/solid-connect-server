@@ -3,6 +3,7 @@ package com.example.solidconnection.university.service;
 import com.example.solidconnection.custom.exception.CustomException;
 import com.example.solidconnection.entity.University;
 import com.example.solidconnection.entity.UniversityInfoForApply;
+import com.example.solidconnection.university.repository.LanguageRequirementRepository;
 import com.example.solidconnection.university.repository.UniversityInfoForApplyRepository;
 import com.example.solidconnection.university.repository.UniversityRepository;
 import lombok.RequiredArgsConstructor;
@@ -17,6 +18,7 @@ import static com.example.solidconnection.custom.exception.ErrorCode.UNIVERSITY_
 public class UniversityValidator {
     private final UniversityInfoForApplyRepository universityInfoForApplyRepository;
     private final UniversityRepository universityRepository;
+    private final LanguageRequirementRepository languageRequirementRepository;
 
     public UniversityInfoForApply getValidatedUniversityInfoForApplyById(Long id){
         return universityInfoForApplyRepository.findByIdAndTerm(id, TERM)

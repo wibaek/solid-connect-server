@@ -3,6 +3,7 @@ package com.example.solidconnection.type;
 import com.example.solidconnection.custom.exception.CustomException;
 
 import java.util.Arrays;
+import java.util.LinkedList;
 import java.util.List;
 import java.util.Optional;
 
@@ -39,8 +40,7 @@ public enum CountryCode {
     HU("헝가리"),
     LT("리투아니아"),
     TH("태국"),
-    UZ("우즈베키스탄")
-    ;
+    UZ("우즈베키스탄");
 
     private final String koreanName;
 
@@ -55,10 +55,15 @@ public enum CountryCode {
         return matchingCountryCode.orElseThrow(() -> new CustomException(INVALID_COUNTRY_NAME, koreanName));
     }
 
-    public static List<CountryCode> getCountryCodeMatchesToKeyword(String keyword) {
-        return Arrays.stream(CountryCode.values())
-                .filter(country -> country.koreanName.contains(keyword))
-                .toList();
+    public static List<CountryCode> getCountryCodeMatchesToKeyword(List<String> keywords) {
+        List<CountryCode> matchedCountryCodes = new LinkedList<>();
+        keywords.forEach( keyword -> {
+            List<CountryCode> countryCodes = Arrays.stream(CountryCode.values())
+                    .filter(country -> country.koreanName.contains(keyword))
+                    .toList();
+            matchedCountryCodes.addAll(countryCodes);
+        });
+        return matchedCountryCodes;
     }
 
     public String getKoreanName() {

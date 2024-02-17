@@ -7,5 +7,5 @@ import com.example.solidconnection.type.RegionCode;
 import java.util.List;
 
 public interface UniversityRepositoryForFilter {
-    List<University> findByRegionAndCountryAndKeyword(RegionCode regionCode, List<CountryCode> countryCodes, String keyword);
+    List<University> findByRegionAndCountryAndKeyword(RegionCode regionCode, List<CountryCode> countryCodes, List<String> keywords);
 }
