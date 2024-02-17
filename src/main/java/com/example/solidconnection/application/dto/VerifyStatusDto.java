@@ -9,4 +9,9 @@ import lombok.*;
 @NoArgsConstructor
 public class VerifyStatusDto {
     private String status;
+    private int updateCount = 0;
+
+    public VerifyStatusDto(String status){
+        this.status = status;
+    }
 }
