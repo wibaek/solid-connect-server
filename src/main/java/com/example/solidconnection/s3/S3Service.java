@@ -33,7 +33,7 @@ public class S3Service {
     private final AmazonS3Client amazonS3;
     private final SiteUserValidator siteUserValidator;
 
-    public ImageUrlDto uploadImgFile(MultipartFile multipartFile, ImgType imageFile) {
+    public UploadedFileURLDto uploadFile(MultipartFile multipartFile, ImgType imageFile) {
         validateImgFile(multipartFile);
         String contentType = multipartFile.getContentType();
         ObjectMetadata metadata = new ObjectMetadata();
@@ -54,7 +54,7 @@ public class S3Service {
             throw new CustomException(S3_CLIENT_EXCEPTION);
         }
 
-        return new ImageUrlDto(amazonS3.getUrl(bucket, fileName).toString());
+        return new UploadedFileURLDto(amazonS3.getUrl(bucket, fileName).toString());
     }
 
     private void validateImgFile(MultipartFile file) {
@@ -65,9 +65,9 @@ public class S3Service {
         String fileName = Objects.requireNonNull(file.getOriginalFilename());
         String fileExtension = getFileExtension(fileName).toLowerCase();
 
-        List<String> allowedExtensions = Arrays.asList("jpg", "jpeg", "png");
+        List<String> allowedExtensions = Arrays.asList("jpg", "jpeg", "png", "webp", "pdf", "word", "docx");
         if (!allowedExtensions.contains(fileExtension)) {
-            throw new CustomException(NOT_IMG_FILE_EXTENSIONS, "허용된 형식: " + allowedExtensions);
+            throw new CustomException(NOT_ALLOWED_FILE_EXTENSIONS, "허용된 형식: " + allowedExtensions);
         }
     }
 
