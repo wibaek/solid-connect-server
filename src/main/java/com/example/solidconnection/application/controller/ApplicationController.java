@@ -21,14 +21,14 @@ public class ApplicationController {
     private final ApplicationService applicationService;
 
     @PostMapping("/score")
-    public CustomResponse registerScore(Principal principal, @Valid @RequestBody ScoreRequestDto scoreRequestDto) {
-        boolean result = applicationService.saveScore(principal.getName(), scoreRequestDto);
+    public CustomResponse submitScore(Principal principal, @Valid @RequestBody ScoreRequestDto scoreRequestDto) {
+        boolean result = applicationService.submitScore(principal.getName(), scoreRequestDto);
         return new StatusResponse(result);
     }
 
     @PostMapping("/university")
-    public CustomResponse registerUniversity(Principal principal, @Valid @RequestBody UniversityRequestDto universityRequestDto) {
-        boolean result = applicationService.saveUniversity(principal.getName(), universityRequestDto);
+    public CustomResponse submitUniversityChoice(Principal principal, @Valid @RequestBody UniversityRequestDto universityRequestDto) {
+        boolean result = applicationService.submitUniversityChoice(principal.getName(), universityRequestDto);
         return new StatusResponse(result);
     }
 

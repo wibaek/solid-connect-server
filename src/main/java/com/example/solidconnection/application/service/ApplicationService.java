@@ -40,33 +40,29 @@ public class ApplicationService {
     private final ApplicationValidator applicationValidator;
     private final UniversityRepositoryForFilterImpl universityRepositoryForFilter;
 
-    public boolean saveScore(String email, ScoreRequestDto scoreRequestDto) {
+    public boolean submitScore(String email, ScoreRequestDto scoreRequestDto) {
         SiteUser siteUser = siteUserValidator.getValidatedSiteUserByEmail(email);
 
-        // 한번 등록 후 수정
+        // 수정
         if (applicationRepository.existsBySiteUser_Email(email)) {
             Application application = applicationValidator.getValidatedApplicationBySiteUser_Email(email);
-            // 수정 횟수 초과 에러 처리
-            if (application.getUpdateCount() > APPLICATION_UPDATE_COUNT_LIMIT) {
-                throw new CustomException(APPLY_UPDATE_LIMIT_EXCEED);
-            }
             application.setGpa(scoreRequestDto.getGpa());
             application.setGpaCriteria(scoreRequestDto.getGpaCriteria());
             application.setGpaReportUrl(scoreRequestDto.getGpaReportUrl());
             application.setLanguageTestScore(scoreRequestDto.getLanguageTestScore());
             application.setLanguageTestType(scoreRequestDto.getLanguageTestType());
             application.setLanguageTestReportUrl(scoreRequestDto.getLanguageTestReportUrl());
-            application.setUpdateCount(application.getUpdateCount() + 1);
+            application.setVerifyStatus(VerifyStatus.PENDING);
             return true;
         }
 
-        // 최초 증록
+        // 최초 등록
         Application application = Application.saveScore(siteUser, scoreRequestDto);
         applicationRepository.save(application);
         return true;
     }
 
-    public boolean saveUniversity(String email, UniversityRequestDto universityRequestDto) {
+    public boolean submitUniversityChoice(String email, UniversityRequestDto universityRequestDto) {
         // 수정 횟수 초과 에러 처리
         Application application = applicationValidator.getValidatedApplicationBySiteUser_Email(email);
         if (application.getUpdateCount() > APPLICATION_UPDATE_COUNT_LIMIT) {
@@ -87,6 +83,12 @@ public class ApplicationService {
             throw new CustomException(CANT_APPLY_FOR_SAME_UNIVERSITY);
         }
 
+
+        // 수정이면 update count 1 증가
+        if (application.getFirstChoiceUniversity() != null) {
+            application.setUpdateCount(application.getUpdateCount() + 1);
+        }
+
         // 수정
         application.setFirstChoiceUniversity(firstChoiceUniversity);
         application.setSecondChoiceUniversity(secondChoiceUniversity);
@@ -97,6 +99,7 @@ public class ApplicationService {
             randomNickname = makeRandomNickname();
         }
         application.setNicknameForApply(randomNickname);
+
         return true;
     }
 
@@ -188,15 +191,14 @@ public class ApplicationService {
         if (application.isEmpty()) {
             return new VerifyStatusDto(ApplicationStatusResponse.NOT_SUBMITTED.name());
         }
+
+        int updateCount = application.get().getUpdateCount();
         if (application.get().getVerifyStatus() == VerifyStatus.PENDING) {
-            return new VerifyStatusDto(ApplicationStatusResponse.SUBMITTED_PENDING.name());
+            return new VerifyStatusDto(ApplicationStatusResponse.SUBMITTED_PENDING.name(), updateCount);
         }
         if (application.get().getVerifyStatus() == VerifyStatus.REJECTED) {
-            return new VerifyStatusDto(ApplicationStatusResponse.SUBMITTED_REJECTED.name());
+            return new VerifyStatusDto(ApplicationStatusResponse.SUBMITTED_REJECTED.name(), updateCount);
         }
-        return VerifyStatusDto.builder()
-                .status(ApplicationStatusResponse.SUBMITTED_APPROVED.name())
-                .updateCount(application.get().getUpdateCount())
-                .build();
+        return new VerifyStatusDto(ApplicationStatusResponse.SUBMITTED_APPROVED.name(), updateCount);
     }
 }
