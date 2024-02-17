@@ -29,6 +29,7 @@ import java.util.Optional;
 import java.util.stream.Collectors;
 
 import static com.example.solidconnection.constants.Constants.RECOMMEND_UNIVERSITY_NUM;
+import static com.example.solidconnection.constants.Constants.TERM;
 
 @Service
 @RequiredArgsConstructor
@@ -143,6 +144,7 @@ public class UniversityService {
 
         List<University> universities = universityRepositoryForFilter.findByRegionAndCountryAndKeyword(regionCode, countryCodes, keyword);
         return universities.stream()
+                .filter(university -> universityInfoForApplyRepository.existsByUniversityAndTerm(university, TERM))
                 .map(university -> {
                     UniversityInfoForApply universityInfoForApply = universityValidator.getValidatedUniversityInfoForApplyByUniversity(university);
                     return UniversityPreviewDto.fromEntity(universityInfoForApply);
