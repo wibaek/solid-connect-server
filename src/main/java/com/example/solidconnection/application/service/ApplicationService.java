@@ -9,6 +9,7 @@ import com.example.solidconnection.entity.SiteUser;
 import com.example.solidconnection.entity.University;
 import com.example.solidconnection.entity.UniversityInfoForApply;
 import com.example.solidconnection.siteuser.service.SiteUserValidator;
+import com.example.solidconnection.type.ApplicationStatusResponse;
 import com.example.solidconnection.type.CountryCode;
 import com.example.solidconnection.type.RegionCode;
 import com.example.solidconnection.type.VerifyStatus;
@@ -183,12 +184,19 @@ public class ApplicationService {
     public VerifyStatusDto getVerifyStatus(String email) {
         SiteUser siteUser = siteUserValidator.getValidatedSiteUserByEmail(email);
         Optional<Application> application = applicationRepository.findBySiteUser_Email(siteUser.getEmail());
+
         if (application.isEmpty()) {
-            return new VerifyStatusDto("NOT_SUBMITTED");
+            return new VerifyStatusDto(ApplicationStatusResponse.NOT_SUBMITTED.name());
         }
-        if (application.get().getVerifyStatus() == VerifyStatus.APPROVED) {
-            return new VerifyStatusDto("SUBMITTED_APPROVED");
+        if (application.get().getVerifyStatus() == VerifyStatus.PENDING) {
+            return new VerifyStatusDto(ApplicationStatusResponse.SUBMITTED_PENDING.name());
         }
-        return new VerifyStatusDto("SUBMITTED_NOT_APPROVED");
+        if (application.get().getVerifyStatus() == VerifyStatus.REJECTED) {
+            return new VerifyStatusDto(ApplicationStatusResponse.SUBMITTED_REJECTED.name());
+        }
+        return VerifyStatusDto.builder()
+                .status(ApplicationStatusResponse.SUBMITTED_APPROVED.name())
+                .updateCount(application.get().getUpdateCount())
+                .build();
     }
 }
