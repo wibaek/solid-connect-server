@@ -191,6 +191,9 @@ public class ApplicationService {
         if (application.isEmpty()) {
             return new VerifyStatusDto(ApplicationStatusResponse.NOT_SUBMITTED.name());
         }
+        if( application.get().getVerifyStatus() != VerifyStatus.REJECTED && application.get().getFirstChoiceUniversity() == null) {
+            return new VerifyStatusDto(ApplicationStatusResponse.SCORE_SUBMITTED.name(), 0);
+        }
 
         int updateCount = application.get().getUpdateCount();
         if (application.get().getVerifyStatus() == VerifyStatus.PENDING) {
