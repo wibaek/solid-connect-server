@@ -14,6 +14,7 @@ import java.util.List;
 @AllArgsConstructor
 public class UniversityPreviewDto {
     private long id;
+    private String term;
     private String koreanName;
     private String region;
     private String country;
@@ -24,6 +25,7 @@ public class UniversityPreviewDto {
     public static UniversityPreviewDto fromEntity(UniversityInfoForApply universityInfoForApply) {
         return UniversityPreviewDto.builder()
                 .id(universityInfoForApply.getId())
+                .term(universityInfoForApply.getTerm())
                 .region(universityInfoForApply.getUniversity().getRegion().getCode().getKoreanName())
                 .country(universityInfoForApply.getUniversity().getCountry().getCode().getKoreanName())
                 .logoImageUrl(universityInfoForApply.getUniversity().getLogoImageUrl())

@@ -20,17 +20,22 @@ public class UniversityValidator {
     private final UniversityRepository universityRepository;
     private final LanguageRequirementRepository languageRequirementRepository;
 
-    public UniversityInfoForApply getValidatedUniversityInfoForApplyById(Long id){
+    public UniversityInfoForApply getValidatedUniversityInfoForApplyByIdAndTerm(Long id) {
         return universityInfoForApplyRepository.findByIdAndTerm(id, TERM)
                 .orElseThrow(() -> new CustomException(UNIVERSITY_INFO_FOR_APPLY_NOT_FOUND));
     }
 
-    public UniversityInfoForApply getValidatedUniversityInfoForApplyByUniversity(University university){
+    public UniversityInfoForApply getValidatedUniversityInfoForApplyById(Long id) {
+        return universityInfoForApplyRepository.findById(id)
+                .orElseThrow(() -> new CustomException(UNIVERSITY_INFO_FOR_APPLY_NOT_FOUND));
+    }
+
+    public UniversityInfoForApply getValidatedUniversityInfoForApplyByUniversityAndTerm(University university) {
         return universityInfoForApplyRepository.findByUniversityAndTerm(university, TERM)
                 .orElseThrow(() -> new CustomException(UNIVERSITY_INFO_FOR_APPLY_NOT_FOUND));
     }
 
-    public University getValidatedUniversityById(Long id){
+    public University getValidatedUniversityById(Long id) {
         return universityRepository.findById(id)
                 .orElseThrow(() -> new CustomException(UNIVERSITY_NOT_FOUND));
     }

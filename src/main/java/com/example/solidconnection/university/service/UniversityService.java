@@ -56,7 +56,7 @@ public class UniversityService {
                 .stream().map(interestedRegion -> interestedRegion.getRegion().getCode())
                 .toList();
         List<UniversityInfoForApply> recommendedUniversities = new java.util.ArrayList<>(universityRepository.findByCountryCodeInOrRegionCodeIn(interestedCountries, interestedRegions)
-                .stream().map(universityValidator::getValidatedUniversityInfoForApplyByUniversity)
+                .stream().map(universityValidator::getValidatedUniversityInfoForApplyByUniversityAndTerm)
                 .toList());
 
         Collections.shuffle(recommendedUniversities);
@@ -147,7 +147,7 @@ public class UniversityService {
         return universities.stream()
                 .filter(university -> universityInfoForApplyRepository.existsByUniversityAndTerm(university, TERM))
                 .filter(university -> {
-                    UniversityInfoForApply universityInfoForApply = universityValidator.getValidatedUniversityInfoForApplyByUniversity(university);
+                    UniversityInfoForApply universityInfoForApply = universityValidator.getValidatedUniversityInfoForApplyByUniversityAndTerm(university);
                     if (!testType.isBlank()) {
                         LanguageTestType languageTestType = LanguageTestType.getLanguageTestTypeForString(testType);
                         if (!testScore.isBlank()) {
@@ -158,7 +158,7 @@ public class UniversityService {
                     return true;
                 })
                 .map(university -> {
-                    UniversityInfoForApply universityInfoForApply = universityValidator.getValidatedUniversityInfoForApplyByUniversity(university);
+                    UniversityInfoForApply universityInfoForApply = universityValidator.getValidatedUniversityInfoForApplyByUniversityAndTerm(university);
                     return UniversityPreviewDto.fromEntity(universityInfoForApply);
                 })
                 .toList();

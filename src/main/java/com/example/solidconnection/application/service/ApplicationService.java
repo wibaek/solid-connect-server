@@ -70,10 +70,10 @@ public class ApplicationService {
         }
 
         // 저장에 필요한 엔티티 불러오기 or 생성
-        UniversityInfoForApply firstChoiceUniversity = universityValidator.getValidatedUniversityInfoForApplyById(universityRequestDto.getFirstChoiceUniversityId());
+        UniversityInfoForApply firstChoiceUniversity = universityValidator.getValidatedUniversityInfoForApplyByIdAndTerm(universityRequestDto.getFirstChoiceUniversityId());
         UniversityInfoForApply secondChoiceUniversity;
         try {
-            secondChoiceUniversity = universityValidator.getValidatedUniversityInfoForApplyById(universityRequestDto.getSecondChoiceUniversityId());
+            secondChoiceUniversity = universityValidator.getValidatedUniversityInfoForApplyByIdAndTerm(universityRequestDto.getSecondChoiceUniversityId());
         } catch (Exception e) {
             secondChoiceUniversity = null;
         }
@@ -148,7 +148,7 @@ public class ApplicationService {
         return universities.stream()
                 .filter(university -> universityInfoForApplyRepository.existsByUniversityAndTerm(university, TERM))
                 .map(university -> {
-                    UniversityInfoForApply universityInfoForApply = universityValidator.getValidatedUniversityInfoForApplyByUniversity(university);
+                    UniversityInfoForApply universityInfoForApply = universityValidator.getValidatedUniversityInfoForApplyByUniversityAndTerm(university);
                     List<Application> firstChoiceApplication = applicationRepository.findAllByFirstChoiceUniversityAndVerifyStatus(universityInfoForApply, VerifyStatus.APPROVED);
                     List<ApplicantDto> firstChoiceApplicant = firstChoiceApplication.stream()
                             .map(ap -> ApplicantDto.fromEntity(ap, Objects.equals(siteUser.getId(), ap.getSiteUser().getId())))
@@ -168,7 +168,7 @@ public class ApplicationService {
         return universities.stream()
                 .filter(university -> universityInfoForApplyRepository.existsByUniversityAndTerm(university, TERM))
                 .map(university -> {
-                    UniversityInfoForApply universityInfoForApply = universityValidator.getValidatedUniversityInfoForApplyByUniversity(university);
+                    UniversityInfoForApply universityInfoForApply = universityValidator.getValidatedUniversityInfoForApplyByUniversityAndTerm(university);
                     List<Application> secondChoiceApplication = applicationRepository.findAllBySecondChoiceUniversityAndVerifyStatus(universityInfoForApply, VerifyStatus.APPROVED);
                     List<ApplicantDto> secondChoiceApplicant = secondChoiceApplication.stream()
                             .map(ap -> ApplicantDto.fromEntity(ap, Objects.equals(siteUser.getId(), ap.getSiteUser().getId())))
