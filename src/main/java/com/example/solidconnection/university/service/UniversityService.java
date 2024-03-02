@@ -26,6 +26,7 @@ import org.springframework.stereotype.Service;
 
 import java.util.Collections;
 import java.util.List;
+import java.util.Objects;
 import java.util.Optional;
 import java.util.stream.Collectors;
 
@@ -56,7 +57,9 @@ public class UniversityService {
                 .stream().map(interestedRegion -> interestedRegion.getRegion().getCode())
                 .toList();
         List<UniversityInfoForApply> recommendedUniversities = new java.util.ArrayList<>(universityRepository.findByCountryCodeInOrRegionCodeIn(interestedCountries, interestedRegions)
-                .stream().map(universityValidator::getValidatedUniversityInfoForApplyByUniversityAndTerm)
+                .stream()
+                .map(universityValidator::getValidatedUniversityInfoForApplyByUniversityAndTermNoException)
+                .filter(Objects::nonNull)
                 .toList());
 
         Collections.shuffle(recommendedUniversities);

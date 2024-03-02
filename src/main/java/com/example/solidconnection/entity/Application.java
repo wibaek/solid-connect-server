@@ -61,7 +61,7 @@ public class Application {
     @JoinColumn(name = "site_user_id")
     private SiteUser siteUser;
 
-    public static Application saveScore(SiteUser siteUser, ScoreRequestDto scoreRequestDto){
+    public static Application saveScore(SiteUser siteUser, ScoreRequestDto scoreRequestDto) {
         return Application.builder()
                 .siteUser(siteUser)
                 .languageTestType(scoreRequestDto.getLanguageTestType())
@@ -71,6 +71,15 @@ public class Application {
                 .gpaCriteria(scoreRequestDto.getGpaCriteria())
                 .gpaReportUrl(scoreRequestDto.getGpaReportUrl())
                 .verifyStatus(VerifyStatus.PENDING)
+                .build();
+    }
+
+    public static Application saveUniversity(SiteUser siteUser, UniversityInfoForApply firstChoiceUniversity,
+                                             UniversityInfoForApply secondChoiceUniversity) {
+        return Application.builder()
+                .siteUser(siteUser)
+                .firstChoiceUniversity(firstChoiceUniversity)
+                .secondChoiceUniversity(secondChoiceUniversity)
                 .build();
     }
 }
