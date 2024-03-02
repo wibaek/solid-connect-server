@@ -35,6 +35,11 @@ public class UniversityValidator {
                 .orElseThrow(() -> new CustomException(UNIVERSITY_INFO_FOR_APPLY_NOT_FOUND));
     }
 
+    public UniversityInfoForApply getValidatedUniversityInfoForApplyByUniversityAndTermNoException(University university) {
+        return universityInfoForApplyRepository.findByUniversityAndTerm(university, TERM)
+                .orElse(null);
+    }
+
     public University getValidatedUniversityById(Long id) {
         return universityRepository.findById(id)
                 .orElseThrow(() -> new CustomException(UNIVERSITY_NOT_FOUND));

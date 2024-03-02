@@ -63,11 +63,7 @@ public class ApplicationService {
     }
 
     public boolean submitUniversityChoice(String email, UniversityRequestDto universityRequestDto) {
-        // 수정 횟수 초과 에러 처리
-        Application application = applicationValidator.getValidatedApplicationBySiteUser_Email(email);
-        if (application.getUpdateCount() > APPLICATION_UPDATE_COUNT_LIMIT) {
-            throw new CustomException(APPLY_UPDATE_LIMIT_EXCEED);
-        }
+        SiteUser siteUser = siteUserValidator.getValidatedSiteUserByEmail(email);
 
         // 저장에 필요한 엔티티 불러오기 or 생성
         UniversityInfoForApply firstChoiceUniversity = universityValidator.getValidatedUniversityInfoForApplyByIdAndTerm(universityRequestDto.getFirstChoiceUniversityId());
@@ -83,6 +79,21 @@ public class ApplicationService {
             throw new CustomException(CANT_APPLY_FOR_SAME_UNIVERSITY);
         }
 
+        Application application;
+
+        // 대학 최초 등록이면
+        if (applicationRepository.findBySiteUser_Email(siteUser.getEmail()).isEmpty()) {
+            application = Application.saveUniversity(siteUser, firstChoiceUniversity, secondChoiceUniversity);
+            application.setNicknameForApply(makeRandomNickname());
+            applicationRepository.save(application);
+            return true;
+        }
+
+        // 수정 횟수 초과 에러 처리
+        application = applicationValidator.getValidatedApplicationBySiteUser_Email(email);
+        if (application.getUpdateCount() > APPLICATION_UPDATE_COUNT_LIMIT) {
+            throw new CustomException(APPLY_UPDATE_LIMIT_EXCEED);
+        }
 
         // 수정이면 update count 1 증가
         if (application.getFirstChoiceUniversity() != null) {
@@ -188,20 +199,30 @@ public class ApplicationService {
         SiteUser siteUser = siteUserValidator.getValidatedSiteUserByEmail(email);
         Optional<Application> application = applicationRepository.findBySiteUser_Email(siteUser.getEmail());
 
+        // 아무것도 제출 안함
         if (application.isEmpty()) {
             return new VerifyStatusDto(ApplicationStatusResponse.NOT_SUBMITTED.name());
         }
-        if( application.get().getVerifyStatus() != VerifyStatus.REJECTED && application.get().getFirstChoiceUniversity() == null) {
-            return new VerifyStatusDto(ApplicationStatusResponse.SCORE_SUBMITTED.name(), 0);
-        }
 
         int updateCount = application.get().getUpdateCount();
+        // 제출한 상태
         if (application.get().getVerifyStatus() == VerifyStatus.PENDING) {
+            // 지망 대학만 제출
+            if (application.get().getGpaReportUrl() == null) {
+                return new VerifyStatusDto(ApplicationStatusResponse.SCORE_SUBMITTED.name(), updateCount);
+            }
+            // 성적만 제출
+            if (application.get().getFirstChoiceUniversity() == null) {
+                return new VerifyStatusDto(ApplicationStatusResponse.SCORE_SUBMITTED.name(), 0);
+            }
+            // 성적 승인 대기 중
             return new VerifyStatusDto(ApplicationStatusResponse.SUBMITTED_PENDING.name(), updateCount);
         }
+        // 성적 승인 반려
         if (application.get().getVerifyStatus() == VerifyStatus.REJECTED) {
             return new VerifyStatusDto(ApplicationStatusResponse.SUBMITTED_REJECTED.name(), updateCount);
         }
+        // 성적 승인 완료
         return new VerifyStatusDto(ApplicationStatusResponse.SUBMITTED_APPROVED.name(), updateCount);
     }
 }

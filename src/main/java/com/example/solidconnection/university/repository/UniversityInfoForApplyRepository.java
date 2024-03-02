@@ -10,7 +10,12 @@ import java.util.Optional;
 @Repository
 public interface UniversityInfoForApplyRepository extends JpaRepository<UniversityInfoForApply, Long> {
     Optional<UniversityInfoForApply> findByUniversityAndTerm(University university, String term);
+
     Boolean existsByUniversityAndTerm(University university, String term);
+
     Optional<UniversityInfoForApply> findByUniversity_KoreanNameAndTerm(String koreanName, String term);
+
     Optional<UniversityInfoForApply> findByIdAndTerm(Long id, String term);
+
+    Optional<UniversityInfoForApply> findByUniversity(University university);
 }
