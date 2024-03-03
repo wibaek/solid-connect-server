@@ -209,7 +209,7 @@ public class ApplicationService {
         if (application.get().getVerifyStatus() == VerifyStatus.PENDING) {
             // 지망 대학만 제출
             if (application.get().getGpaReportUrl() == null) {
-                return new VerifyStatusDto(ApplicationStatusResponse.SCORE_SUBMITTED.name(), updateCount);
+                return new VerifyStatusDto(ApplicationStatusResponse.COLLEGE_SUBMITTED.name(), updateCount);
             }
             // 성적만 제출
             if (application.get().getFirstChoiceUniversity() == null) {
