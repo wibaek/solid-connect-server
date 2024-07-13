@@ -52,7 +52,7 @@ public class JwtAuthenticationFilter extends OncePerRequestFilter {
             if (token != null) { // 토큰이 있어야 검증 - 토큰 유무에 대한 다른 처리를 컨트롤러에서 할 수 있음
                 try {
                     String requestURI = request.getRequestURI();
-                    if(requestURI.equals("/auth/reissue")) {
+                    if (requestURI.equals("/auth/reissue")) {
                         Authentication auth = this.tokenService.getAuthentication(token);
                         SecurityContextHolder.getContext().setAuthentication(auth);
                         filterChain.doFilter(request, response);
@@ -106,6 +106,10 @@ public class JwtAuthenticationFilter extends OncePerRequestFilter {
 
         // 대학교 정보
         permitAllEndpoints.add("/university/search/**");
+
+        // API 문서
+        permitAllEndpoints.add("/swagger-ui/**");
+        permitAllEndpoints.add("/v3/api-docs/**");
 
         return permitAllEndpoints;
     }

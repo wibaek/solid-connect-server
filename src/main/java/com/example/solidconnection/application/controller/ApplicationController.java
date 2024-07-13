@@ -1,49 +1,69 @@
 package com.example.solidconnection.application.controller;
 
-import com.example.solidconnection.application.dto.ApplicationsDto;
-import com.example.solidconnection.application.dto.ScoreRequestDto;
-import com.example.solidconnection.application.dto.UniversityRequestDto;
-import com.example.solidconnection.application.dto.VerifyStatusDto;
-import com.example.solidconnection.application.service.ApplicationService;
-import com.example.solidconnection.custom.response.CustomResponse;
-import com.example.solidconnection.custom.response.DataResponse;
-import com.example.solidconnection.custom.response.StatusResponse;
+import com.example.solidconnection.application.dto.ApplicationSubmissionResponse;
+import com.example.solidconnection.application.dto.ApplicationsResponse;
+import com.example.solidconnection.application.dto.ScoreRequest;
+import com.example.solidconnection.application.dto.UniversityChoiceRequest;
+import com.example.solidconnection.application.dto.VerifyStatusResponse;
+import com.example.solidconnection.application.service.ApplicationQueryService;
+import com.example.solidconnection.application.service.ApplicationSubmissionService;
+import com.example.solidconnection.application.service.VerifyStatusQueryService;
 import jakarta.validation.Valid;
 import lombok.RequiredArgsConstructor;
-import org.springframework.web.bind.annotation.*;
+import org.springframework.http.HttpStatus;
+import org.springframework.http.ResponseEntity;
+import org.springframework.web.bind.annotation.GetMapping;
+import org.springframework.web.bind.annotation.PostMapping;
+import org.springframework.web.bind.annotation.RequestBody;
+import org.springframework.web.bind.annotation.RequestMapping;
+import org.springframework.web.bind.annotation.RequestParam;
+import org.springframework.web.bind.annotation.RestController;
 
 import java.security.Principal;
 
-@RestController
-@RequestMapping("/application")
 @RequiredArgsConstructor
-public class ApplicationController {
-    private final ApplicationService applicationService;
+@RequestMapping("/application")
+@RestController
+public class ApplicationController implements ApplicationControllerSwagger {
+
+    private final ApplicationSubmissionService applicationSubmissionService;
+    private final ApplicationQueryService applicationQueryService;
+    private final VerifyStatusQueryService verifyStatusQueryService;
 
     @PostMapping("/score")
-    public CustomResponse submitScore(Principal principal, @Valid @RequestBody ScoreRequestDto scoreRequestDto) {
-        boolean result = applicationService.submitScore(principal.getName(), scoreRequestDto);
-        return new StatusResponse(result);
+    public ResponseEntity<ApplicationSubmissionResponse> submitScore(
+            Principal principal,
+            @Valid @RequestBody ScoreRequest scoreRequest) {
+        boolean result = applicationSubmissionService.submitScore(principal.getName(), scoreRequest);
+        return ResponseEntity
+                .status(HttpStatus.OK)
+                .body(new ApplicationSubmissionResponse(result));
     }
 
     @PostMapping("/university")
-    public CustomResponse submitUniversityChoice(Principal principal, @Valid @RequestBody UniversityRequestDto universityRequestDto) {
-        boolean result = applicationService.submitUniversityChoice(principal.getName(), universityRequestDto);
-        return new StatusResponse(result);
-    }
+    public ResponseEntity<ApplicationSubmissionResponse> submitUniversityChoice(
+            Principal principal,
+            @Valid @RequestBody UniversityChoiceRequest universityChoiceRequest) {
+        boolean result = applicationSubmissionService.submitUniversityChoice(principal.getName(), universityChoiceRequest);
+        return ResponseEntity
+                .status(HttpStatus.OK)
+                    .body(new ApplicationSubmissionResponse(result));
+        }
 
     @GetMapping
-    public CustomResponse getApplicants(
+    public ResponseEntity<ApplicationsResponse> getApplicants(
             Principal principal,
             @RequestParam(required = false, defaultValue = "") String region,
             @RequestParam(required = false, defaultValue = "") String keyword) {
-        ApplicationsDto result = applicationService.getApplicants(principal.getName(), region, keyword);
-        return new DataResponse<>(result);
+        ApplicationsResponse result = applicationQueryService.getApplicants(principal.getName(), region, keyword);
+        return ResponseEntity
+                .ok(result);
     }
 
     @GetMapping("/status")
-    public CustomResponse getVerifyStatus(Principal principal) {
-        VerifyStatusDto result = applicationService.getVerifyStatus(principal.getName());
-        return new DataResponse<>(result);
+    public ResponseEntity<VerifyStatusResponse> getApplicationVerifyStatus(Principal principal) {
+        VerifyStatusResponse result = verifyStatusQueryService.getVerifyStatus(principal.getName());
+        return ResponseEntity
+                .ok(result);
     }
 }

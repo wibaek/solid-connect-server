@@ -1,19 +1,33 @@
 package com.example.solidconnection.entity;
 
-import com.example.solidconnection.type.CountryCode;
-import jakarta.persistence.*;
+import jakarta.persistence.Column;
+import jakarta.persistence.Entity;
+import jakarta.persistence.Id;
+import jakarta.persistence.ManyToOne;
+import lombok.AccessLevel;
+import lombok.EqualsAndHashCode;
 import lombok.Getter;
+import lombok.NoArgsConstructor;
 
-@Entity
 @Getter
+@EqualsAndHashCode(of = {"code", "koreanName"})
+@NoArgsConstructor(access = AccessLevel.PROTECTED)
+@Entity
 public class Country {
-    @Id
-    @Column(length = 2, name = "country_code", columnDefinition = "VARCHAR(2)")
-    @Enumerated(EnumType.STRING)
-    private CountryCode code;
 
-    // 연관 관계
+    @Id
+    @Column(length = 2)
+    private String code;
+
+    @Column(nullable = false, length = 100)
+    private String koreanName;
+
     @ManyToOne
-    @JoinColumn(name = "region_code", referencedColumnName="region_code")
     private Region region;
+
+    public Country(String code, String koreanName, Region region) {
+        this.code = code;
+        this.koreanName = koreanName;
+        this.region = region;
+    }
 }

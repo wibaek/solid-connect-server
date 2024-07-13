@@ -1,55 +1,63 @@
 package com.example.solidconnection.auth.controller;
 
-import com.example.solidconnection.auth.dto.ReissueResponseDto;
-import com.example.solidconnection.auth.dto.SignUpRequestDto;
-import com.example.solidconnection.auth.dto.SignUpResponseDto;
-import com.example.solidconnection.auth.dto.kakao.KakaoCodeDto;
-import com.example.solidconnection.auth.dto.kakao.KakaoOauthResponseDto;
+import com.example.solidconnection.auth.dto.ReissueResponse;
+import com.example.solidconnection.auth.dto.SignUpRequest;
+import com.example.solidconnection.auth.dto.SignUpResponse;
+import com.example.solidconnection.auth.dto.kakao.KakaoCodeRequest;
+import com.example.solidconnection.auth.dto.kakao.KakaoOauthResponse;
 import com.example.solidconnection.auth.service.AuthService;
-import com.example.solidconnection.auth.service.KakaoOAuthService;
-import com.example.solidconnection.custom.response.CustomResponse;
-import com.example.solidconnection.custom.response.DataResponse;
-import com.example.solidconnection.custom.response.StatusResponse;
+import com.example.solidconnection.auth.service.SignInService;
+import com.example.solidconnection.auth.service.SignUpService;
 import jakarta.validation.Valid;
 import lombok.RequiredArgsConstructor;
-import org.springframework.web.bind.annotation.*;
+import org.springframework.http.ResponseEntity;
+import org.springframework.web.bind.annotation.PatchMapping;
+import org.springframework.web.bind.annotation.PostMapping;
+import org.springframework.web.bind.annotation.RequestBody;
+import org.springframework.web.bind.annotation.RequestMapping;
+import org.springframework.web.bind.annotation.RestController;
 
 import java.security.Principal;
 
-@RestController
-@RequestMapping("auth")
 @RequiredArgsConstructor
-public class AuthController {
-    private final KakaoOAuthService kakaoOAuthService;
+@RequestMapping("/auth")
+@RestController
+public class AuthController implements AuthControllerSwagger {
+
     private final AuthService authService;
+    private final SignUpService signUpService;
+    private final SignInService signInService;
 
     @PostMapping("/kakao")
-    public CustomResponse kakaoOauth(@RequestBody KakaoCodeDto kakaoCodeDto) {
-        KakaoOauthResponseDto kakaoOauthResponseDto = kakaoOAuthService.processOauth(kakaoCodeDto.getCode());
-        return new DataResponse<>(kakaoOauthResponseDto);
+    public ResponseEntity<KakaoOauthResponse> processKakaoOauth(@RequestBody KakaoCodeRequest kakaoCodeRequest) {
+        KakaoOauthResponse kakaoOauthResponse = signInService.signIn(kakaoCodeRequest);
+        return ResponseEntity
+                .ok(kakaoOauthResponse);
     }
 
     @PostMapping("/sign-up")
-    public CustomResponse signUp(@Valid @RequestBody SignUpRequestDto signUpRequestDto) {
-        SignUpResponseDto signUpResponseDto = authService.signUp(signUpRequestDto);
-        return new DataResponse<>(signUpResponseDto);
+    public ResponseEntity<SignUpResponse> signUp(@Valid @RequestBody SignUpRequest signUpRequest) {
+        SignUpResponse signUpResponseDto = signUpService.signUp(signUpRequest);
+        return ResponseEntity
+                .ok(signUpResponseDto);
     }
 
     @PostMapping("/sign-out")
-    public CustomResponse signOut(Principal principal) {
-        boolean status = authService.signOut(principal.getName());
-        return new StatusResponse(status);
+    public ResponseEntity<Void> signOut(Principal principal) {
+        authService.signOut(principal.getName());
+        return ResponseEntity.ok().build();
     }
 
     @PatchMapping("/quit")
-    public CustomResponse quit(Principal principal) {
-        boolean status = authService.quit(principal.getName());
-        return new StatusResponse(status);
+    public ResponseEntity<Void> quit(Principal principal) {
+        authService.quit(principal.getName());
+        return ResponseEntity.ok().build();
     }
 
     @PostMapping("/reissue")
-    public CustomResponse reissue(Principal principal) {
-        ReissueResponseDto reissueResponseDto = authService.reissue(principal.getName());
-        return new DataResponse<>(reissueResponseDto);
+    public ResponseEntity<ReissueResponse> reissueToken(Principal principal) {
+        ReissueResponse reissueResponse = authService.reissue(principal.getName());
+        return ResponseEntity
+                .ok(reissueResponse);
     }
 }

@@ -1,27 +1,32 @@
 package com.example.solidconnection.entity;
 
-import jakarta.persistence.*;
-import lombok.AllArgsConstructor;
-import lombok.Builder;
+import com.example.solidconnection.siteuser.domain.SiteUser;
+import jakarta.persistence.Entity;
+import jakarta.persistence.GeneratedValue;
+import jakarta.persistence.GenerationType;
+import jakarta.persistence.Id;
+import jakarta.persistence.ManyToOne;
+import lombok.AccessLevel;
 import lombok.Getter;
 import lombok.NoArgsConstructor;
 
-@Entity
-@Builder
-@NoArgsConstructor
-@AllArgsConstructor
 @Getter
+@NoArgsConstructor(access = AccessLevel.PROTECTED)
+@Entity
 public class InterestedRegion {
+
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     private Long id;
 
-    // 연관 관계
     @ManyToOne
-    @JoinColumn(name = "site_user_id")
     private SiteUser siteUser;
 
     @ManyToOne
-    @JoinColumn(name = "region_code")
     private Region region;
+
+    public InterestedRegion(SiteUser siteUser, Region region) {
+        this.siteUser = siteUser;
+        this.region = region;
+    }
 }
