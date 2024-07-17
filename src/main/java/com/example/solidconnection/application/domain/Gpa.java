@@ -15,7 +15,7 @@ public class Gpa {
     @Column(nullable = false, name = "gpa")
     private Double gpa;
 
-    @Column(nullable = false, name = "gpa_creteria")
+    @Column(nullable = false, name = "gpa_criteria")
     private Double gpaCriteria;
 
     @Column(nullable = false, name = "gpa_report_url", length = 500)
