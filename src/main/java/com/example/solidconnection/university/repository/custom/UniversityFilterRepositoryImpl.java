@@ -82,7 +82,7 @@ public class UniversityFilterRepositoryImpl implements UniversityFilterRepositor
                 .join(universityInfoForApply.university, university)
                 .join(university.country, country)
                 .join(country.region, region)
-                .join(universityInfoForApply.languageRequirements, languageRequirement)
+                .leftJoin(universityInfoForApply.languageRequirements, languageRequirement)
                 .where(regionCodeEq(region, regionCode)
                         .and(countryOrUniversityContainsKeyword(country, university, keywords)))
                 .fetch();
