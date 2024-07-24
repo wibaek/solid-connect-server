@@ -1,11 +1,13 @@
 package com.example.solidconnection.university.service;
 
+import com.example.solidconnection.repositories.CountryRepository;
 import com.example.solidconnection.university.domain.UniversityInfoForApply;
 import com.example.solidconnection.university.repository.UniversityInfoForApplyRepository;
-import jakarta.annotation.PostConstruct;
 import lombok.Getter;
 import lombok.RequiredArgsConstructor;
 import org.springframework.beans.factory.annotation.Value;
+import org.springframework.boot.context.event.ApplicationReadyEvent;
+import org.springframework.context.event.EventListener;
 import org.springframework.stereotype.Component;
 
 import java.util.List;
@@ -24,6 +26,7 @@ public class GeneralRecommendUniversities {
     @Getter
     private final List<UniversityInfoForApply> recommendUniversities;
     private final UniversityInfoForApplyRepository universityInfoForApplyRepository;
+    private final CountryRepository countryRepository;
     private final List<String> candidates = List.of(
             "오스트라바 대학", "RMIT멜버른공과대학(A형)", "알브슈타트 지그마링엔 대학",
             "뉴저지시티대학(A형)", "도요대학", "템플대학(A형)", "빈 공과대학교",
@@ -34,7 +37,7 @@ public class GeneralRecommendUniversities {
     @Value("${university.term}")
     public String term;
 
-    @PostConstruct
+    @EventListener(ApplicationReadyEvent.class)
     public void init() {
         int i = 0;
         while (recommendUniversities.size() < RECOMMEND_UNIVERSITY_NUM && i < candidates.size()) {
