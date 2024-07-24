@@ -3,7 +3,6 @@ package com.example.solidconnection.university.repository.custom;
 import com.example.solidconnection.entity.QCountry;
 import com.example.solidconnection.entity.QRegion;
 import com.example.solidconnection.type.LanguageTestType;
-import com.example.solidconnection.university.domain.QLanguageRequirement;
 import com.example.solidconnection.university.domain.QUniversity;
 import com.example.solidconnection.university.domain.QUniversityInfoForApply;
 import com.example.solidconnection.university.domain.University;
@@ -68,26 +67,25 @@ public class UniversityFilterRepositoryImpl implements UniversityFilterRepositor
     }
 
     @Override
-    public List<UniversityInfoForApply> findByRegionCodeAndKeywordsAndLanguageTestTypeAndTestScore(
-            String regionCode, List<String> keywords, LanguageTestType testType, String testScore) {
+    public List<UniversityInfoForApply> findByRegionCodeAndKeywordsAndLanguageTestTypeAndTestScoreAndTerm(
+            String regionCode, List<String> keywords, LanguageTestType testType, String testScore, String term) {
 
         QUniversity university = QUniversity.university;
         QCountry country = QCountry.country;
         QRegion region = QRegion.region;
         QUniversityInfoForApply universityInfoForApply = QUniversityInfoForApply.universityInfoForApply;
-        QLanguageRequirement languageRequirement = QLanguageRequirement.languageRequirement;
 
         List<UniversityInfoForApply> filteredUniversityInfoForApply = queryFactory
                 .selectFrom(universityInfoForApply)
                 .join(universityInfoForApply.university, university)
                 .join(university.country, country)
-                .join(country.region, region)
-                .leftJoin(universityInfoForApply.languageRequirements, languageRequirement)
+                .join(university.region, region)
                 .where(regionCodeEq(region, regionCode)
-                        .and(countryOrUniversityContainsKeyword(country, university, keywords)))
+                        .and(countryOrUniversityContainsKeyword(country, university, keywords))
+                        .and(universityInfoForApply.term.eq(term)))
                 .fetch();
 
-        if(testType == null || testScore == null || testScore.isEmpty()) {
+        if(testScore == null || testScore.isEmpty()) {
             if(testType != null) {
                 return filteredUniversityInfoForApply.stream()
                         .filter(uifa -> uifa.getLanguageRequirements().stream()
