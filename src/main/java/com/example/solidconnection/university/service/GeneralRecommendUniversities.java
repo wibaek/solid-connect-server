@@ -1,11 +1,13 @@
 package com.example.solidconnection.university.service;
 
+import com.example.solidconnection.repositories.CountryRepository;
 import com.example.solidconnection.university.domain.UniversityInfoForApply;
 import com.example.solidconnection.university.repository.UniversityInfoForApplyRepository;
-import jakarta.annotation.PostConstruct;
 import lombok.Getter;
 import lombok.RequiredArgsConstructor;
 import org.springframework.beans.factory.annotation.Value;
+import org.springframework.boot.context.event.ApplicationReadyEvent;
+import org.springframework.context.event.EventListener;
 import org.springframework.stereotype.Component;
 
 import java.util.List;
@@ -24,17 +26,18 @@ public class GeneralRecommendUniversities {
     @Getter
     private final List<UniversityInfoForApply> recommendUniversities;
     private final UniversityInfoForApplyRepository universityInfoForApplyRepository;
+    private final CountryRepository countryRepository;
     private final List<String> candidates = List.of(
             "오스트라바 대학", "RMIT멜버른공과대학(A형)", "알브슈타트 지그마링엔 대학",
             "뉴저지시티대학(A형)", "도요대학", "템플대학(A형)", "빈 공과대학교",
             "리스본대학 공과대학", "바덴뷔르템베르크 산학협력대학", "긴다이대학", "네바다주립대학 라스베이거스(B형)", "릴 가톨릭 대학",
-            "그라츠공과대학", "그라츠 대학", "코펜하겐 IT대학", "메이지대학", "분쿄가쿠인대학"
+            "그라츠공과대학", "그라츠 대학", "코펜하겐 IT대학", "메이지대학", "분쿄가쿠인대학", "린츠 카톨릭 대학교"
     );
 
     @Value("${university.term}")
     public String term;
 
-    @PostConstruct
+    @EventListener(ApplicationReadyEvent.class)
     public void init() {
         int i = 0;
         while (recommendUniversities.size() < RECOMMEND_UNIVERSITY_NUM && i < candidates.size()) {

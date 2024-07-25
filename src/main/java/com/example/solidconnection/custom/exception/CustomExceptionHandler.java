@@ -66,11 +66,10 @@ public class CustomExceptionHandler {
                 .body(errorResponse);
     }
 
-
     @ExceptionHandler(Exception.class)
     public ResponseEntity<Object> handleOtherException(Exception ex) {
         String errorMessage = ex.getMessage();
-        log.error("알 수 없는 예외 발생 : {}", errorMessage);
+        log.error("서버 내부 예외 발생 : {}", errorMessage);
         ErrorResponse errorResponse = new ErrorResponse(NOT_DEFINED_ERROR, errorMessage);
         return ResponseEntity
                 .status(HttpStatus.INTERNAL_SERVER_ERROR)

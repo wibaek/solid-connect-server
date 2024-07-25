@@ -39,6 +39,7 @@ public class ApplicationQueryService {
      * 다른 지원자들의 성적을 조회한다.
      * - 유저가 다른 지원자들을 볼 수 있는지 검증한다.
      * - 지역과 키워드를 통해 대학을 필터링한다.
+     *   - 지역은 영어 대문자로 받는다 e.g. ASIA
      * - 1지망, 2지망 지원자들을 조회한다.
      * */
     @Transactional(readOnly = true)

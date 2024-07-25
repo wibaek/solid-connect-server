@@ -16,10 +16,10 @@ public record SignUpRequest(
         @Schema(description = "카카오 인증 토큰", example = "kakaoToken123")
         String kakaoOauthToken,
 
-        @ArraySchema(schema = @Schema(description = "관심 지역 목록", example = "[\"아시아\", \"유럽\"]"))
+        @ArraySchema(schema = @Schema(description = "관심 지역 목록", example = "아시아권"))
         List<String> interestedRegions,
 
-        @ArraySchema(schema = @Schema(description = "관심 국가 목록", example = "[\"일본\", \"독일\"]"))
+        @ArraySchema(schema = @Schema(description = "관심 국가 목록", example = "일본"))
         List<String> interestedCountries,
 
         @Schema(description = "지원 준비 단계", example = "CONSIDERING")
