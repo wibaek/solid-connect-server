@@ -24,6 +24,7 @@ public class UniversityRecommendService {
     private final UniversityInfoForApplyRepository universityInfoForApplyRepository;
     private final GeneralRecommendUniversities generalRecommendUniversities;
     private final SiteUserRepository siteUserRepository;
+
     @Value("${university.term}")
     public String term;
 
@@ -39,16 +40,16 @@ public class UniversityRecommendService {
         // 맞춤 추천 대학교를 불러온다.
         List<UniversityInfoForApply> personalRecommends = universityInfoForApplyRepository
                 .findUniversityInfoForAppliesBySiteUsersInterestedCountryOrRegionAndTerm(siteUser, term);
-        List<UniversityInfoForApply> shuffledList
+        List<UniversityInfoForApply> trimmedRecommendUniversities
                 = personalRecommends.subList(0, Math.min(RECOMMEND_UNIVERSITY_NUM, personalRecommends.size()));
-        Collections.shuffle(personalRecommends);
+        Collections.shuffle(trimmedRecommendUniversities);
 
         // 맞춤 추천 대학교의 수가 6개보다 적다면, 일반 추천 대학교를 부족한 수 만큼 불러온다.
-        if (shuffledList.size() < 6) {
-            shuffledList.addAll(getGeneralRecommendsExcludingSelected(shuffledList));
+        if (trimmedRecommendUniversities.size() < RECOMMEND_UNIVERSITY_NUM) {
+            trimmedRecommendUniversities.addAll(getGeneralRecommendsExcludingSelected(trimmedRecommendUniversities));
         }
 
-        return new UniversityRecommendsResponse(shuffledList.stream()
+        return new UniversityRecommendsResponse(trimmedRecommendUniversities.stream()
                 .map(UniversityInfoForApplyPreviewResponse::from)
                 .toList());
     }

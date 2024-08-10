@@ -50,7 +50,7 @@ public class SecurityConfiguration {
                                 "/", "/index.html", "/favicon.ico",
                                 "/file/profile/pre",
                                 "/auth/kakao", "/auth/sign-up", "/auth/reissue",
-                                "/university/detail/**", "/university/search/**", "/home",
+                                "/university/detail/**", "/university/search/**", "/university/recommends",
                                 "/swagger-ui/**", "/v3/api-docs/**"
                         )
                         .permitAll()

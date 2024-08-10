@@ -14,6 +14,7 @@ import jakarta.persistence.ManyToOne;
 import jakarta.persistence.OneToMany;
 import lombok.AccessLevel;
 import lombok.AllArgsConstructor;
+import lombok.EqualsAndHashCode;
 import lombok.Getter;
 import lombok.NoArgsConstructor;
 
@@ -21,6 +22,7 @@ import java.util.HashSet;
 import java.util.Set;
 
 @Getter
+@EqualsAndHashCode(of = "id")
 @AllArgsConstructor(access = AccessLevel.PUBLIC)
 @NoArgsConstructor(access = AccessLevel.PROTECTED)
 @Entity
@@ -71,10 +73,10 @@ public class UniversityInfoForApply {
     @Column(length = 500)
     private String details;
 
-    @OneToMany(mappedBy = "universityInfoForApply", fetch = FetchType.LAZY)
+    @OneToMany(mappedBy = "universityInfoForApply", fetch = FetchType.EAGER)
     private Set<LanguageRequirement> languageRequirements = new HashSet<>();
 
-    @ManyToOne(fetch = FetchType.LAZY)
+    @ManyToOne(fetch = FetchType.EAGER)
     private University university;
 
     public void addLanguageRequirements(LanguageRequirement languageRequirements) {

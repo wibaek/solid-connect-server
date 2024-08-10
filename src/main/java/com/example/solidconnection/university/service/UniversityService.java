@@ -52,6 +52,7 @@ public class UniversityService {
     /*
      * 대학교 검색 결과를 불러온다.
      * - 권역, 키워드, 언어 시험 종류, 언어 시험 점수를 조건으로 검색하여 결과를 반환한다.
+     *   - 권역은 영어 대문자로 받는다 e.g. ASIA
      *   - 키워드는 국가명 또는 대학명에 포함되는 것이 조건이다.
      *   - 언어 시험 점수는 합격 최소 점수보다 높은 것이 조건이다.
      * */
@@ -59,7 +60,7 @@ public class UniversityService {
     public List<UniversityInfoForApplyPreviewResponse> searchUniversity(
             String regionCode, List<String> keywords, LanguageTestType testType, String testScore) {
         return universityFilterRepository
-                .findByRegionCodeAndKeywordsAndLanguageTestTypeAndTestScore(regionCode, keywords, testType, testScore)
+                .findByRegionCodeAndKeywordsAndLanguageTestTypeAndTestScoreAndTerm(regionCode, keywords, testType, testScore, term)
                 .stream()
                 .map(UniversityInfoForApplyPreviewResponse::from)
                 .toList();

@@ -10,6 +10,6 @@ public interface UniversityFilterRepository {
 
     List<University> findByRegionCodeAndKeywords(String regionCode, List<String> keywords);
 
-    List<UniversityInfoForApply> findByRegionCodeAndKeywordsAndLanguageTestTypeAndTestScore(
-            String regionCode, List<String> keywords, LanguageTestType testType, String testScore);
+    List<UniversityInfoForApply> findByRegionCodeAndKeywordsAndLanguageTestTypeAndTestScoreAndTerm(
+            String regionCode, List<String> keywords, LanguageTestType testType, String testScore, String term);
 }
