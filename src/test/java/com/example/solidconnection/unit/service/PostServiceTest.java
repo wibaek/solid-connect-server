@@ -43,7 +43,7 @@ import static org.mockito.Mockito.when;
 
 @ExtendWith(MockitoExtension.class)
 @DisplayName("게시글 서비스 테스트")
-public class PostServiceTest {
+class PostServiceTest {
     @InjectMocks
     PostService postService;
     @Mock
@@ -239,6 +239,22 @@ public class PostServiceTest {
                 .isEqualTo(INVALID_BOARD_CODE.getMessage());
         assertThat(exception.getCode())
                 .isEqualTo(INVALID_BOARD_CODE.getCode());
+    }
+
+    @Test
+    void 게시글을_등록할_때_유효한_카테고리가_아니라면_예외_응답을_반환한다() {
+        // Given
+        String invalidPostCategory = "invalidPostCategory";
+        PostCreateRequest postCreateRequest = new PostCreateRequest(
+                invalidPostCategory, "title", "content", false);
+
+        // When & Then
+        CustomException exception = assertThrows(CustomException.class, () -> postService
+                .createPost(siteUser.getEmail(), board.getCode(), postCreateRequest, Collections.emptyList()));
+        assertThat(exception.getMessage())
+                .isEqualTo(INVALID_POST_CATEGORY.getMessage());
+        assertThat(exception.getCode())
+                .isEqualTo(INVALID_POST_CATEGORY.getCode());
     }
 
     @Test
