@@ -4,14 +4,13 @@ import com.example.solidconnection.board.domain.Board;
 import com.example.solidconnection.board.repository.BoardRepository;
 import com.example.solidconnection.post.domain.Post;
 import com.example.solidconnection.post.repository.PostRepository;
-import com.example.solidconnection.service.RedisService;
+import com.example.solidconnection.post.service.PostService;
 import com.example.solidconnection.siteuser.domain.SiteUser;
 import com.example.solidconnection.siteuser.repository.SiteUserRepository;
 import com.example.solidconnection.type.Gender;
 import com.example.solidconnection.type.PostCategory;
 import com.example.solidconnection.type.PreparationStatus;
 import com.example.solidconnection.type.Role;
-import com.example.solidconnection.util.RedisUtils;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;
@@ -25,24 +24,21 @@ import java.util.concurrent.ExecutorService;
 import java.util.concurrent.Executors;
 import java.util.concurrent.TimeUnit;
 
-import static com.example.solidconnection.type.RedisConstants.*;
 import static org.junit.jupiter.api.Assertions.assertEquals;
 
 @SpringBootTest
 @ActiveProfiles("test")
-@DisplayName("게시글 조회수 동시성 테스트")
-public class PostViewCountConcurrencyTest {
+@DisplayName("게시글 좋아요 동시성 테스트")
+class PostLikeCountConcurrencyTest {
 
     @Autowired
-    private RedisService redisService;
+    private PostService postService;
     @Autowired
     private PostRepository postRepository;
     @Autowired
     private BoardRepository boardRepository;
     @Autowired
     private SiteUserRepository siteUserRepository;
-    @Autowired
-    private RedisUtils redisUtils;
 
     @Value("${view.count.scheduling.delay}")
     private int SCHEDULING_DELAY_MS;
@@ -55,13 +51,14 @@ public class PostViewCountConcurrencyTest {
     private SiteUser siteUser;
 
     @BeforeEach
-    public void setUp() {
+    void setUp() {
         board = createBoard();
         boardRepository.save(board);
         siteUser = createSiteUser();
         siteUserRepository.save(siteUser);
         post = createPost(board, siteUser);
         postRepository.save(post);
+        createSiteUsers();
     }
 
     private SiteUser createSiteUser() {
@@ -74,6 +71,22 @@ public class PostViewCountConcurrencyTest {
                 Role.MENTEE,
                 Gender.MALE
         );
+    }
+
+    private void createSiteUsers() {
+        for (int i = 0; i < 1000; i++) {
+
+            SiteUser siteUser = new SiteUser(
+                    "email" + i,
+                    "nickname",
+                    "profileImageUrl",
+                    "1999-01-01",
+                    PreparationStatus.CONSIDERING,
+                    Role.MENTEE,
+                    Gender.MALE
+            );
+            siteUserRepository.save(siteUser);
+        }
     }
 
     private Board createBoard() {
@@ -96,17 +109,19 @@ public class PostViewCountConcurrencyTest {
     }
 
     @Test
-    public void 게시글을_조회할_때_조회수_동시성_문제를_해결한다() throws InterruptedException {
-
-        redisService.deleteKey(redisUtils.getValidatePostViewCountRedisKey(siteUser.getEmail(), post.getId()));
+    void 게시글_좋아요_동시성_문제를_해결한다() throws InterruptedException {
 
         ExecutorService executorService = Executors.newFixedThreadPool(THREAD_POOL_SIZE);
         CountDownLatch doneSignal = new CountDownLatch(THREAD_NUMS);
 
+        Long likeCount = postRepository.getById(post.getId()).getLikeCount();
+
         for (int i = 0; i < THREAD_NUMS; i++) {
+            String email = "email" + i;
             executorService.submit(() -> {
                 try {
-                    redisService.increaseViewCount(redisUtils.getPostViewCountRedisKey(post.getId()));
+                    postService.likePost(email, board.getCode(), post.getId());
+                    postService.dislikePost(email, board.getCode(), post.getId());
                 } finally {
                     doneSignal.countDown();
                 }
@@ -120,54 +135,7 @@ public class PostViewCountConcurrencyTest {
             System.err.println("ExecutorService did not terminate in the expected time.");
         }
 
-        Thread.sleep(SCHEDULING_DELAY_MS+1000);
-
-        assertEquals(THREAD_NUMS, postRepository.getById(post.getId()).getViewCount());
+        assertEquals(likeCount, postRepository.getById(post.getId()).getLikeCount());
     }
 
-    @Test
-    public void 게시글을_조회할_때_조회수_조작_문제를_해결한다() throws InterruptedException {
-
-        redisService.deleteKey(redisUtils.getValidatePostViewCountRedisKey(siteUser.getEmail(), post.getId()));
-
-        ExecutorService executorService = Executors.newFixedThreadPool(THREAD_POOL_SIZE);
-        CountDownLatch doneSignal = new CountDownLatch(THREAD_NUMS);
-
-        for (int i = 0; i < THREAD_NUMS; i++) {
-            executorService.submit(() -> {
-                try {
-                    boolean isFirstTime = redisService.isPresent(redisUtils.getValidatePostViewCountRedisKey(siteUser.getEmail(), post.getId()));
-                    if (isFirstTime) {
-                        redisService.increaseViewCount(redisUtils.getPostViewCountRedisKey(post.getId()));
-                    }
-                } finally {
-                    doneSignal.countDown();
-                }
-            });
-        }
-        Thread.sleep(Long.parseLong(VALIDATE_VIEW_COUNT_TTL.getValue()) * 1000);
-        for (int i = 0; i < THREAD_NUMS; i++) {
-            executorService.submit(() -> {
-                try {
-                    boolean isFirstTime = redisService.isPresent(redisUtils.getValidatePostViewCountRedisKey(siteUser.getEmail(), post.getId()));
-                    if (isFirstTime) {
-                        redisService.increaseViewCount(redisUtils.getPostViewCountRedisKey(post.getId()));
-                    }
-                } finally {
-                    doneSignal.countDown();
-                }
-            });
-        }
-
-        doneSignal.await(TIMEOUT_SECONDS, TimeUnit.SECONDS);
-        executorService.shutdown();
-        boolean terminated = executorService.awaitTermination(TIMEOUT_SECONDS, TimeUnit.SECONDS);
-        if (!terminated) {
-            System.err.println("ExecutorService did not terminate in the expected time.");
-        }
-
-        Thread.sleep(SCHEDULING_DELAY_MS+1000);
-
-        assertEquals(2L, postRepository.getById(post.getId()).getViewCount());
-    }
 }

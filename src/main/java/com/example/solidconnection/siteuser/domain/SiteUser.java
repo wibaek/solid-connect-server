@@ -1,8 +1,8 @@
 package com.example.solidconnection.siteuser.domain;
 
-import com.example.solidconnection.entity.Comment;
+import com.example.solidconnection.comment.domain.Comment;
 import com.example.solidconnection.post.domain.Post;
-import com.example.solidconnection.entity.mapping.PostLike;
+import com.example.solidconnection.post.domain.PostLike;
 import com.example.solidconnection.type.Gender;
 import com.example.solidconnection.type.PreparationStatus;
 import com.example.solidconnection.type.Role;
@@ -59,7 +59,7 @@ public class SiteUser {
     @OneToMany(mappedBy = "siteUser", cascade = CascadeType.ALL, orphanRemoval = true)
     private List<Post> postList = new ArrayList<>();
 
-    @OneToMany(mappedBy = "siteUser", cascade = CascadeType.ALL, orphanRemoval = true)
+    @OneToMany(mappedBy = "siteUser", cascade = CascadeType.ALL)
     private List<Comment> commentList = new ArrayList<>();
 
     @OneToMany(mappedBy = "siteUser", cascade = CascadeType.ALL, orphanRemoval = true)

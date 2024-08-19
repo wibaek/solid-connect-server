@@ -9,6 +9,8 @@ import com.example.solidconnection.custom.exception.CustomException;
 import com.example.solidconnection.custom.exception.ErrorCode;
 import com.example.solidconnection.dto.PostFindPostImageResponse;
 import com.example.solidconnection.entity.PostImage;
+import com.example.solidconnection.post.domain.PostLike;
+import com.example.solidconnection.post.repository.PostLikeRepository;
 import com.example.solidconnection.post.domain.Post;
 import com.example.solidconnection.post.dto.*;
 import com.example.solidconnection.post.repository.PostRepository;
@@ -43,7 +45,7 @@ import static org.mockito.Mockito.when;
 
 @ExtendWith(MockitoExtension.class)
 @DisplayName("게시글 서비스 테스트")
-public class PostServiceTest {
+class PostServiceTest {
     @InjectMocks
     PostService postService;
     @Mock
@@ -52,6 +54,8 @@ public class PostServiceTest {
     SiteUserRepository siteUserRepository;
     @Mock
     BoardRepository boardRepository;
+    @Mock
+    PostLikeRepository postLikeRepository;
     @Mock
     S3Service s3Service;
     @Mock
@@ -66,6 +70,7 @@ public class PostServiceTest {
     private Post post;
     private Post postWithImages;
     private Post questionPost;
+    private PostLike postLike;
     private List<MultipartFile> imageFiles;
     private List<MultipartFile> imageFilesWithMoreThanFiveFiles;
     private List<UploadedFileUrlResponse> uploadedFileUrlResponseList;
@@ -81,6 +86,7 @@ public class PostServiceTest {
         post = createPost(board, siteUser);
         postWithImages = createPostWithImages(board, siteUser);
         questionPost = createQuestionPost(board, siteUser);
+        postLike = createPostLike(post, siteUser);
     }
 
     private SiteUser createSiteUser() {
@@ -145,6 +151,12 @@ public class PostServiceTest {
         );
         post.setBoardAndSiteUser(board, siteUser);
         return post;
+    }
+
+    private PostLike createPostLike(Post post, SiteUser siteUser) {
+        PostLike postLike = new PostLike();
+        postLike.setPostAndSiteUser(post, siteUser);
+        return postLike;
     }
 
     private List<MultipartFile> createMockImageFiles() {
@@ -239,6 +251,22 @@ public class PostServiceTest {
                 .isEqualTo(INVALID_BOARD_CODE.getMessage());
         assertThat(exception.getCode())
                 .isEqualTo(INVALID_BOARD_CODE.getCode());
+    }
+
+    @Test
+    void 게시글을_등록할_때_유효한_카테고리가_아니라면_예외_응답을_반환한다() {
+        // Given
+        String invalidPostCategory = "invalidPostCategory";
+        PostCreateRequest postCreateRequest = new PostCreateRequest(
+                invalidPostCategory, "title", "content", false);
+
+        // When & Then
+        CustomException exception = assertThrows(CustomException.class, () -> postService
+                .createPost(siteUser.getEmail(), board.getCode(), postCreateRequest, Collections.emptyList()));
+        assertThat(exception.getMessage())
+                .isEqualTo(INVALID_POST_CATEGORY.getMessage());
+        assertThat(exception.getCode())
+                .isEqualTo(INVALID_POST_CATEGORY.getCode());
     }
 
     @Test
@@ -415,6 +443,8 @@ public class PostServiceTest {
         // Given
         List<PostFindCommentResponse> commentFindResultDTOList = new ArrayList<>();
         when(postRepository.getByIdUsingEntityGraph(post.getId())).thenReturn(post);
+        when(siteUserRepository.getByEmail(siteUser.getEmail())).thenReturn(siteUser);
+        when(postLikeRepository.findPostLikeByPostAndSiteUser(post, siteUser)).thenReturn(Optional.empty());
         when(commentService.findCommentsByPostId(siteUser.getEmail(), post.getId())).thenReturn(commentFindResultDTOList);
 
         // When
@@ -424,6 +454,7 @@ public class PostServiceTest {
         PostFindResponse expectedResponse = PostFindResponse.from(
                 post,
                 true,
+                false,
                 PostFindBoardResponse.from(post.getBoard()),
                 PostFindSiteUserResponse.from(post.getSiteUser()),
                 commentFindResultDTOList,
@@ -431,6 +462,8 @@ public class PostServiceTest {
         );
         assertEquals(expectedResponse, response);
         verify(postRepository, times(1)).getByIdUsingEntityGraph(post.getId());
+        verify(siteUserRepository, times(1)).getByEmail(siteUser.getEmail());
+        verify(postLikeRepository, times(1)).findPostLikeByPostAndSiteUser(post, siteUser);
         verify(commentService, times(1)).findCommentsByPostId(siteUser.getEmail(), post.getId());
     }
 
@@ -537,5 +570,126 @@ public class PostServiceTest {
                 .isEqualTo(ErrorCode.CAN_NOT_DELETE_OR_UPDATE_QUESTION.getMessage());
         assertThat(exception.getCode())
                 .isEqualTo(ErrorCode.CAN_NOT_DELETE_OR_UPDATE_QUESTION.getCode());
+    }
+
+    /**
+     * 게시글 좋아요
+     */
+    @Test
+    void 게시글_좋아요를_등록한다() {
+        // Given
+        when(postRepository.getById(post.getId())).thenReturn(post);
+        when(siteUserRepository.getByEmail(siteUser.getEmail())).thenReturn(siteUser);
+
+        // When
+        PostLikeResponse postLikeResponse = postService.likePost(siteUser.getEmail(), board.getCode(), post.getId());
+
+        // Then
+        assertEquals(postLikeResponse, PostLikeResponse.from(post));
+        verify(postLikeRepository, times(1)).save(any(PostLike.class));
+    }
+
+    @Test
+    void 게시글_좋아요를_등록할_때_중복된_좋아요라면_예외_응답을_반환한다() {
+        when(postRepository.getById(post.getId())).thenReturn(post);
+        when(siteUserRepository.getByEmail(siteUser.getEmail())).thenReturn(siteUser);
+        when(postLikeRepository.findPostLikeByPostAndSiteUser(post, siteUser)).thenReturn(Optional.of(postLike));
+
+        // When & Then
+        CustomException exception = assertThrows(CustomException.class, () ->
+                postService.likePost(siteUser.getEmail(), board.getCode(), post.getId()));
+        assertThat(exception.getMessage())
+                .isEqualTo(ErrorCode.DUPLICATE_POST_LIKE.getMessage());
+        assertThat(exception.getCode())
+                .isEqualTo(ErrorCode.DUPLICATE_POST_LIKE.getCode());
+    }
+
+    @Test
+    void 게시글_좋아요를_등록할_때_유효한_게시판이_아니라면_예외_응답을_반환한다() {
+        // Given
+        String invalidBoardCode = "INVALID_CODE";
+
+        // When & Then
+        CustomException exception = assertThrows(CustomException.class, () ->
+                postService.likePost(siteUser.getEmail(), invalidBoardCode, post.getId()));
+        assertThat(exception.getMessage())
+                .isEqualTo(ErrorCode.INVALID_BOARD_CODE.getMessage());
+        assertThat(exception.getCode())
+                .isEqualTo(ErrorCode.INVALID_BOARD_CODE.getCode());
+    }
+
+    @Test
+    void 게시글_좋아요를_등록할_때_유효한_게시글이_아니라면_예외_응답을_반환한다() {
+        // Given
+        Long invalidPostId = -1L;
+        when(postRepository.getById(invalidPostId)).thenThrow(new CustomException(INVALID_POST_ID));
+
+        // When & Then
+        CustomException exception = assertThrows(CustomException.class, () ->
+                postService.likePost(siteUser.getEmail(), board.getCode(), invalidPostId));
+        assertThat(exception.getMessage())
+                .isEqualTo(INVALID_POST_ID.getMessage());
+        assertThat(exception.getCode())
+                .isEqualTo(INVALID_POST_ID.getCode());
+    }
+
+    @Test
+    void 게시글_좋아요를_삭제한다() {
+        // Given
+        Long likeCount = post.getLikeCount();
+        when(postRepository.getById(post.getId())).thenReturn(post);
+        when(siteUserRepository.getByEmail(siteUser.getEmail())).thenReturn(siteUser);
+        when(postLikeRepository.getByPostAndSiteUser(post, siteUser)).thenReturn(postLike);
+
+        // When
+        PostDislikeResponse postDislikeResponse = postService.dislikePost(siteUser.getEmail(), board.getCode(), post.getId());
+
+        // Then
+        assertEquals(postDislikeResponse, PostDislikeResponse.from(post));
+        verify(postLikeRepository, times(1)).deleteById(post.getId());
+    }
+
+    @Test
+    void 게시글_좋아요를_삭제할_때_존재하지_않는_좋아요라면_예외_응답을_반환한다() {
+        when(postRepository.getById(post.getId())).thenReturn(post);
+        when(siteUserRepository.getByEmail(siteUser.getEmail())).thenReturn(siteUser);
+        when(postLikeRepository.getByPostAndSiteUser(post, siteUser)).thenThrow(new CustomException(INVALID_POST_LIKE));
+
+        // When & Then
+        CustomException exception = assertThrows(CustomException.class, () ->
+                postService.dislikePost(siteUser.getEmail(), board.getCode(), post.getId()));
+        assertThat(exception.getMessage())
+                .isEqualTo(ErrorCode.INVALID_POST_LIKE.getMessage());
+        assertThat(exception.getCode())
+                .isEqualTo(ErrorCode.INVALID_POST_LIKE.getCode());
+    }
+
+    @Test
+    void 게시글_좋아요를_삭제할_때_유효한_게시판이_아니라면_예외_응답을_반환한다() {
+        // Given
+        String invalidBoardCode = "INVALID_CODE";
+
+        // When & Then
+        CustomException exception = assertThrows(CustomException.class, () ->
+                postService.dislikePost(siteUser.getEmail(), invalidBoardCode, post.getId()));
+        assertThat(exception.getMessage())
+                .isEqualTo(ErrorCode.INVALID_BOARD_CODE.getMessage());
+        assertThat(exception.getCode())
+                .isEqualTo(ErrorCode.INVALID_BOARD_CODE.getCode());
+    }
+
+    @Test
+    void 게시글_좋아요를_삭제할_때_유효한_게시글이_아니라면_예외_응답을_반환한다() {
+        // Given
+        Long invalidPostId = -1L;
+        when(postRepository.getById(invalidPostId)).thenThrow(new CustomException(INVALID_POST_ID));
+
+        // When & Then
+        CustomException exception = assertThrows(CustomException.class, () ->
+                postService.dislikePost(siteUser.getEmail(), board.getCode(), invalidPostId));
+        assertThat(exception.getMessage())
+                .isEqualTo(INVALID_POST_ID.getMessage());
+        assertThat(exception.getCode())
+                .isEqualTo(INVALID_POST_ID.getCode());
     }
 }

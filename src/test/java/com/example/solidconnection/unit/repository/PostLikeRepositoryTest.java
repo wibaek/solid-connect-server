@@ -3,6 +3,8 @@ package com.example.solidconnection.unit.repository;
 import com.example.solidconnection.board.domain.Board;
 import com.example.solidconnection.board.repository.BoardRepository;
 import com.example.solidconnection.custom.exception.CustomException;
+import com.example.solidconnection.post.domain.PostLike;
+import com.example.solidconnection.post.repository.PostLikeRepository;
 import com.example.solidconnection.post.domain.Post;
 import com.example.solidconnection.post.repository.PostRepository;
 import com.example.solidconnection.siteuser.domain.SiteUser;
@@ -11,7 +13,6 @@ import com.example.solidconnection.type.Gender;
 import com.example.solidconnection.type.PostCategory;
 import com.example.solidconnection.type.PreparationStatus;
 import com.example.solidconnection.type.Role;
-import jakarta.persistence.EntityManager;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;
@@ -20,14 +21,15 @@ import org.springframework.boot.test.autoconfigure.orm.jpa.DataJpaTest;
 import org.springframework.test.context.ActiveProfiles;
 import org.springframework.transaction.annotation.Transactional;
 
-import static com.example.solidconnection.custom.exception.ErrorCode.INVALID_BOARD_CODE;
+import static com.example.solidconnection.custom.exception.ErrorCode.INVALID_POST_LIKE;
 import static org.assertj.core.api.Assertions.assertThat;
-import static org.junit.jupiter.api.Assertions.*;
+import static org.junit.jupiter.api.Assertions.assertEquals;
+import static org.junit.jupiter.api.Assertions.assertThrows;
 
 @DataJpaTest
 @ActiveProfiles("test")
-@DisplayName("게시판 레포지토리 테스트")
-class BoardRepositoryTest {
+@DisplayName("게시글 좋아요 레포지토리 테스트")
+class PostLikeRepositoryTest {
     @Autowired
     private PostRepository postRepository;
     @Autowired
@@ -35,30 +37,24 @@ class BoardRepositoryTest {
     @Autowired
     private SiteUserRepository siteUserRepository;
     @Autowired
-    private EntityManager entityManager;
+    private PostLikeRepository postLikeRepository;
 
+    private Post post;
     private Board board;
     private SiteUser siteUser;
-    private Post post;
+    private PostLike postLike;
+
 
     @BeforeEach
-    public void setUp() {
+    void setUp() {
         board = createBoard();
         boardRepository.save(board);
-
         siteUser = createSiteUser();
         siteUserRepository.save(siteUser);
-
         post = createPost(board, siteUser);
         post = postRepository.save(post);
-
-        entityManager.flush();
-        entityManager.clear();
-    }
-
-    private Board createBoard() {
-        return new Board(
-                "FREE", "자유게시판");
+        postLike = createPostLike(post, siteUser);
+        postLikeRepository.save(postLike);
     }
 
     private SiteUser createSiteUser() {
@@ -71,6 +67,11 @@ class BoardRepositoryTest {
                 Role.MENTEE,
                 Gender.MALE
         );
+    }
+
+    private Board createBoard() {
+        return new Board(
+                "FREE", "자유게시판");
     }
 
     private Post createPost(Board board, SiteUser siteUser) {
@@ -86,56 +87,36 @@ class BoardRepositoryTest {
         return post;
     }
 
-    @Test
-    @Transactional
-    public void 게시판을_조회할_때_게시글은_즉시_로딩한다() {
-        // when
-        Board foundBoard = boardRepository.getByCodeUsingEntityGraph(board.getCode());
-        foundBoard.getPostList().size(); // 추가쿼리 발생하지 않는다.
-
-        // then
-        assertThat(foundBoard.getCode()).isEqualTo(board.getCode());
+    private PostLike createPostLike(Post post, SiteUser siteUser) {
+        PostLike postLike = new PostLike();
+        postLike.setPostAndSiteUser(post, siteUser);
+        return postLike;
     }
 
     @Test
     @Transactional
-    public void 게시판을_조회할_때_게시글은_즉시_로딩한다_유효한_게시판이_아니라면_예외_응답을_반환한다() {
+    void 게시글_좋아요를_조회한다() {
+        // when
+        PostLike foundPostLike = postLikeRepository.getByPostAndSiteUser(post, siteUser);
+
+        // then
+        assertEquals(foundPostLike, postLike);
+    }
+
+    @Test
+    @Transactional
+    void 게시글_좋아요를_조회할_때_유효한_좋아요가_아니라면_예외_응답을_반환한다() {
         // given
-        String invalidCode = "INVALID_CODE";
+        postLike.resetPostAndSiteUser();
+        postLikeRepository.delete(postLike);
 
         // when, then
         CustomException exception = assertThrows(CustomException.class, () -> {
-            boardRepository.getByCodeUsingEntityGraph(invalidCode);
+            postLikeRepository.getByPostAndSiteUser(post, siteUser);
         });
         assertThat(exception.getMessage())
-                .isEqualTo(INVALID_BOARD_CODE.getMessage());
+                .isEqualTo(INVALID_POST_LIKE.getMessage());
         assertThat(exception.getCode())
-                .isEqualTo(INVALID_BOARD_CODE.getCode());
-    }
-
-    @Test
-    @Transactional
-    public void 게시판을_조회한다() {
-        // when
-        Board foundBoard = boardRepository.getByCode(board.getCode());
-
-        // then
-        assertEquals(board.getCode(), foundBoard.getCode());
-    }
-
-    @Test
-    @Transactional
-    public void 게시판을_조회할_때_유효한_게시판이_아니라면_예외_응답을_반환한다() {
-        // given
-        String invalidCode = "INVALID_CODE";
-
-        // when, then
-        CustomException exception = assertThrows(CustomException.class, () -> {
-            boardRepository.getByCode(invalidCode);
-        });
-        assertThat(exception.getMessage())
-                .isEqualTo(INVALID_BOARD_CODE.getMessage());
-        assertThat(exception.getCode())
-                .isEqualTo(INVALID_BOARD_CODE.getCode());
+                .isEqualTo(INVALID_POST_LIKE.getCode());
     }
 }

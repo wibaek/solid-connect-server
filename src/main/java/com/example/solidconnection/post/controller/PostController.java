@@ -4,6 +4,7 @@ import com.example.solidconnection.post.dto.*;
 import com.example.solidconnection.post.service.PostService;
 import io.swagger.v3.oas.annotations.security.SecurityRequirement;
 import io.swagger.v3.oas.annotations.security.SecurityRequirements;
+import jakarta.validation.Valid;
 import lombok.RequiredArgsConstructor;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
@@ -28,7 +29,7 @@ public class PostController {
     public ResponseEntity<?> createPost(
             Principal principal,
             @PathVariable("code") String code,
-            @RequestPart("postCreateRequest") PostCreateRequest postCreateRequest,
+            @Valid @RequestPart("postCreateRequest") PostCreateRequest postCreateRequest,
             @RequestParam(value = "file", required = false) List<MultipartFile> imageFile) {
 
         if (imageFile == null) {
@@ -44,7 +45,7 @@ public class PostController {
             Principal principal,
             @PathVariable("code") String code,
             @PathVariable("post_id") Long postId,
-            @RequestPart("postUpdateRequest") PostUpdateRequest postUpdateRequest,
+            @Valid @RequestPart("postUpdateRequest") PostUpdateRequest postUpdateRequest,
             @RequestParam(value = "file", required = false) List<MultipartFile> imageFile) {
 
         if (imageFile == null) {
@@ -75,5 +76,27 @@ public class PostController {
 
         PostDeleteResponse postDeleteResponse = postService.deletePostById(principal.getName(), code, postId);
         return ResponseEntity.ok().body(postDeleteResponse);
+    }
+
+    @PostMapping(value = "/{code}/posts/{post_id}/like")
+    public ResponseEntity<?> likePost(
+            Principal principal,
+            @PathVariable("code") String code,
+            @PathVariable("post_id") Long postId
+    ) {
+
+        PostLikeResponse postLikeResponse = postService.likePost(principal.getName(), code, postId);
+        return ResponseEntity.ok().body(postLikeResponse);
+    }
+
+    @DeleteMapping(value = "/{code}/posts/{post_id}/like")
+    public ResponseEntity<?> dislikePost(
+            Principal principal,
+            @PathVariable("code") String code,
+            @PathVariable("post_id") Long postId
+    ) {
+
+        PostDislikeResponse postDislikeResponse = postService.dislikePost(principal.getName(), code, postId);
+        return ResponseEntity.ok().body(postDislikeResponse);
     }
 }

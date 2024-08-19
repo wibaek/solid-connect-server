@@ -48,7 +48,7 @@ public enum ErrorCode {
     INVALID_TEST_TYPE(HttpStatus.BAD_REQUEST.value(), "지원하지 않은 어학 시험 종류입니다."),
     APPLICATION_NOT_APPROVED(HttpStatus.BAD_REQUEST.value(), "성적표가 인증되지 않았습니다."),
     APPLY_UPDATE_LIMIT_EXCEED(HttpStatus.BAD_REQUEST.value(), "지원 정보 수정은 " + APPLICATION_UPDATE_COUNT_LIMIT + "회까지만 가능합니다."),
-    CANT_APPLY_FOR_SAME_UNIVERSITY(HttpStatus.BAD_REQUEST.value(), "1, 2지망에 동일한 대학교를 입력할 수 없습니다."),
+    CANT_APPLY_FOR_SAME_UNIVERSITY(HttpStatus.BAD_REQUEST.value(), "1, 2, 3지망에 동일한 대학교를 입력할 수 없습니다."),
     CAN_NOT_CHANGE_NICKNAME_YET(HttpStatus.BAD_REQUEST.value(), "마지막 닉네임 변경으로부터 " + MIN_DAYS_BETWEEN_NICKNAME_CHANGES + "일이 지나지 않았습니다."),
 
     // community
@@ -58,6 +58,11 @@ public enum ErrorCode {
     INVALID_POST_ACCESS(HttpStatus.BAD_REQUEST.value(), "자신의 게시글만 제어할 수 있습니다."),
     CAN_NOT_DELETE_OR_UPDATE_QUESTION(HttpStatus.BAD_REQUEST.value(), "질문글은 수정이나 삭제할 수 없습니다."),
     CAN_NOT_UPLOAD_MORE_THAN_FIVE_IMAGES(HttpStatus.BAD_REQUEST.value(), "5개 이상의 파일을 업로드할 수 없습니다."),
+    INVALID_COMMENT_ID(HttpStatus.BAD_REQUEST.value(), "존재하지 않는 댓글입니다."),
+    INVALID_COMMENT_ACCESS(HttpStatus.BAD_REQUEST.value(), "자신의 댓글만 제어할 수 있습니다."),
+    CAN_NOT_UPDATE_DEPRECATED_COMMENT(HttpStatus.BAD_REQUEST.value(),"이미 삭제된 댓글을 수정할 수 없습니다."),
+    INVALID_POST_LIKE(HttpStatus.BAD_REQUEST.value(), "존재하지 않는 게시글 좋아요입니다."),
+    DUPLICATE_POST_LIKE(HttpStatus.BAD_REQUEST.value(), "이미 좋아요한 게시글입니다."),
 
     // general
     JSON_PARSING_FAILED(HttpStatus.BAD_REQUEST.value(), "JSON 파싱을 할 수 없습니다."),
