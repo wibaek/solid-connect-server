@@ -16,7 +16,9 @@ import org.springframework.beans.factory.annotation.Value;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
+import java.util.HashSet;
 import java.util.Objects;
+import java.util.Set;
 
 import static com.example.solidconnection.custom.exception.ErrorCode.APPLY_UPDATE_LIMIT_EXCEED;
 import static com.example.solidconnection.custom.exception.ErrorCode.CANT_APPLY_FOR_SAME_UNIVERSITY;
@@ -61,7 +63,7 @@ public class ApplicationSubmissionService {
 
     /*
      * 지망 대학교를 제출한다.
-     * - 첫번째 지망과 두번째 지망이 같은지 검증한다.
+     * - 지망 대학중 중복된 대학교가 있는지 검증한다.
      * - 지원 정보 제출 내역이 없다면, 지금의 프로세스(성적 제출 후 지망대학 제출)에 벗어나는 요청이므로 예외를 응답한다.
      * - 기존에 제출한 적이 있다면, 수정한다.
      *   - 수정 횟수 제한을 초과하지 않았는지 검증한다.
@@ -70,7 +72,7 @@ public class ApplicationSubmissionService {
      * */
     @Transactional
     public boolean submitUniversityChoice(String email, UniversityChoiceRequest universityChoiceRequest) {
-        validateFirstAndSecondChoiceIdDifferent(universityChoiceRequest);
+        validateNoDuplicateUniversityChoices(universityChoiceRequest);
         Application application = applicationRepository.findBySiteUser_Email(email)
                 .orElseThrow(() -> new CustomException(SCORE_SHOULD_SUBMITTED_FIRST));
 
@@ -78,9 +80,11 @@ public class ApplicationSubmissionService {
                 .getUniversityInfoForApplyByIdAndTerm(universityChoiceRequest.firstChoiceUniversityId(), term);
         UniversityInfoForApply secondChoiceUniversity = universityInfoForApplyRepository
                 .getUniversityInfoForApplyByIdAndTerm(universityChoiceRequest.secondChoiceUniversityId(), term);
+        UniversityInfoForApply thirdChoiceUniversity = universityInfoForApplyRepository
+                .getUniversityInfoForApplyByIdAndTerm(universityChoiceRequest.thirdChoiceUniversityId(), term);
 
         validateUpdateLimitNotExceed(application);
-        application.updateUniversityChoice(firstChoiceUniversity, secondChoiceUniversity, getRandomNickname());
+        application.updateUniversityChoice(firstChoiceUniversity, secondChoiceUniversity, thirdChoiceUniversity, getRandomNickname());
         return true;
     }
 
@@ -98,10 +102,14 @@ public class ApplicationSubmissionService {
         }
     }
 
-    private void validateFirstAndSecondChoiceIdDifferent(UniversityChoiceRequest universityChoiceRequest) {
-        if (Objects.equals(
-                universityChoiceRequest.firstChoiceUniversityId(),
-                universityChoiceRequest.secondChoiceUniversityId())) {
+    private void validateNoDuplicateUniversityChoices(UniversityChoiceRequest universityChoiceRequest) {
+        Set<Long> uniqueUniversityIds = new HashSet<>();
+
+        uniqueUniversityIds.add(universityChoiceRequest.firstChoiceUniversityId());
+        uniqueUniversityIds.add(universityChoiceRequest.secondChoiceUniversityId());
+        uniqueUniversityIds.add(universityChoiceRequest.thirdChoiceUniversityId());
+
+        if (uniqueUniversityIds.size() < 3) {
             throw new CustomException(CANT_APPLY_FOR_SAME_UNIVERSITY);
         }
     }
