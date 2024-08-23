@@ -41,6 +41,13 @@ public class CommentService {
         }
     }
 
+    // 대대댓글부터 허용하지 않음
+    private void validateCommentDepth(Comment parentComment) {
+        if (parentComment.getParentComment() != null) {
+            throw new CustomException(INVALID_COMMENT_LEVEL);
+        }
+    }
+
     @Transactional(readOnly = true)
     public List<PostFindCommentResponse> findCommentsByPostId(String email, Long postId) {
         return commentRepository.findCommentTreeByPostId(postId)
@@ -58,6 +65,7 @@ public class CommentService {
         Comment parentComment = null;
         if (commentCreateRequest.parentId() != null) {
             parentComment = commentRepository.getById(commentCreateRequest.parentId());
+            validateCommentDepth(parentComment);
         }
         Comment createdComment = commentRepository.save(commentCreateRequest.toEntity(siteUser, post, parentComment));
 
@@ -91,7 +99,7 @@ public class CommentService {
             // 대댓글을 삭제합니다.
             comment.resetPostAndSiteUserAndParentComment();
             commentRepository.deleteById(commentId);
-            // 대댓글 삭제 이후, 부모댓글이 무의미하다면 이 역시 삭제합니다.
+            // 대댓글 삭제 이후, 부모댓글이 무의미하다면 이역시 삭제합니다.
             if (parentComment.getCommentList().isEmpty() && parentComment.getContent() == null) {
                 parentComment.resetPostAndSiteUserAndParentComment();
                 commentRepository.deleteById(parentComment.getId());
