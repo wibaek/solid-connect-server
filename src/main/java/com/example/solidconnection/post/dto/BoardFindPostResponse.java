@@ -3,7 +3,7 @@ package com.example.solidconnection.post.dto;
 import com.example.solidconnection.entity.PostImage;
 import com.example.solidconnection.post.domain.Post;
 
-import java.time.LocalDateTime;
+import java.time.ZonedDateTime;
 import java.util.List;
 import java.util.stream.Collectors;
 
@@ -13,8 +13,8 @@ public record BoardFindPostResponse(
         String content,
         Long likeCount,
         Integer commentCount,
-        LocalDateTime createdAt,
-        LocalDateTime updatedAt,
+        ZonedDateTime createdAt,
+        ZonedDateTime updatedAt,
         String postCategory,
         String url
 ) {

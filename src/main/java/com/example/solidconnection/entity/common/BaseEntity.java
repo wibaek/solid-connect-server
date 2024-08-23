@@ -2,14 +2,14 @@ package com.example.solidconnection.entity.common;
 
 import jakarta.persistence.EntityListeners;
 import jakarta.persistence.MappedSuperclass;
+import jakarta.persistence.PrePersist;
+import jakarta.persistence.PreUpdate;
 import lombok.Getter;
 import org.hibernate.annotations.DynamicInsert;
 import org.hibernate.annotations.DynamicUpdate;
-import org.springframework.data.annotation.CreatedDate;
-import org.springframework.data.annotation.LastModifiedDate;
 import org.springframework.data.jpa.domain.support.AuditingEntityListener;
 
-import java.time.LocalDateTime;
+import java.time.ZonedDateTime;
 
 @MappedSuperclass
 @EntityListeners(AuditingEntityListener.class)
@@ -18,9 +18,17 @@ import java.time.LocalDateTime;
 @DynamicInsert
 public abstract class BaseEntity {
 
-    @CreatedDate
-    private LocalDateTime createdAt;
+    private ZonedDateTime createdAt;
+    private ZonedDateTime updatedAt;
 
-    @LastModifiedDate
-    private LocalDateTime updatedAt;
+    @PrePersist
+    public void onPrePersist() {
+        this.createdAt = ZonedDateTime.now();
+        this.updatedAt = ZonedDateTime.now();
+    }
+
+    @PreUpdate
+    public void onPreUpdate() {
+        this.updatedAt = ZonedDateTime.now();
+    }
 }
