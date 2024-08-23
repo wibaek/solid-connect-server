@@ -13,11 +13,9 @@ import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
 import java.util.List;
-import java.util.Optional;
 import java.util.stream.Collectors;
 
-import static com.example.solidconnection.custom.exception.ErrorCode.CAN_NOT_UPDATE_DEPRECATED_COMMENT;
-import static com.example.solidconnection.custom.exception.ErrorCode.INVALID_POST_ACCESS;
+import static com.example.solidconnection.custom.exception.ErrorCode.*;
 
 @Service
 @RequiredArgsConstructor
@@ -87,15 +85,28 @@ public class CommentService {
         Comment comment = commentRepository.getById(commentId);
         validateOwnership(comment, email);
 
-        if (comment.getCommentList().isEmpty()) {
-            // 하위 댓글이 없다면 삭제한다.
+        if (comment.getParentComment() != null) {
+            // 대댓글인 경우
+            Comment parentComment = comment.getParentComment();
+            // 대댓글을 삭제합니다.
             comment.resetPostAndSiteUserAndParentComment();
             commentRepository.deleteById(commentId);
+            // 대댓글 삭제 이후, 부모댓글이 무의미하다면 이 역시 삭제합니다.
+            if (parentComment.getCommentList().isEmpty() && parentComment.getContent() == null) {
+                parentComment.resetPostAndSiteUserAndParentComment();
+                commentRepository.deleteById(parentComment.getId());
+            }
         } else {
-            // 하위 댓글 있으면 value만 null로 수정한다.
-            comment.deprecateComment();
+            // 댓글인 경우
+            if (comment.getCommentList().isEmpty()) {
+                // 대댓글이 없는 경우
+                comment.resetPostAndSiteUserAndParentComment();
+                commentRepository.deleteById(commentId);
+            } else {
+                // 대댓글이 있는 경우
+                comment.deprecateComment();
+            }
         }
-
         return new CommentDeleteResponse(commentId);
     }
 }
