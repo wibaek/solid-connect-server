@@ -92,9 +92,9 @@ public record UniversityDetailResponse(
             University university,
             UniversityInfoForApply universityInfoForApply) {
         return new UniversityDetailResponse(
-                university.getId(),
+                universityInfoForApply.getId(),
                 universityInfoForApply.getTerm(),
-                university.getKoreanName(),
+                universityInfoForApply.getKoreanName(),
                 university.getEnglishName(),
                 university.getFormatName(),
                 university.getRegion().getKoreanName(),
