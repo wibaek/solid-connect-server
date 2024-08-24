@@ -9,6 +9,7 @@ import org.hibernate.annotations.DynamicInsert;
 import org.hibernate.annotations.DynamicUpdate;
 import org.springframework.data.jpa.domain.support.AuditingEntityListener;
 
+import java.time.ZoneId;
 import java.time.ZonedDateTime;
 
 @MappedSuperclass
@@ -23,12 +24,12 @@ public abstract class BaseEntity {
 
     @PrePersist
     public void onPrePersist() {
-        this.createdAt = ZonedDateTime.now();
-        this.updatedAt = ZonedDateTime.now();
+        this.createdAt = ZonedDateTime.now(ZoneId.of("UTC"));
+        this.updatedAt = this.createdAt;
     }
 
     @PreUpdate
     public void onPreUpdate() {
-        this.updatedAt = ZonedDateTime.now();
+        this.updatedAt = ZonedDateTime.now(ZoneId.of("UTC"));
     }
 }
