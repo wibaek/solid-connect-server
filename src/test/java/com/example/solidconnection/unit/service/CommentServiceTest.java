@@ -44,9 +44,10 @@ class CommentServiceTest {
     private SiteUser siteUser;
     private Board board;
     private Post post;
-    private Comment parentComment_1;
-    private Comment parentComment_2;
-    private Comment p1s_childComment;
+    private Comment parentComment;
+    private Comment parentCommentWithNullContent;
+    private Comment childComment;
+    private Comment childCommentOfNullContentParent;
 
 
     @BeforeEach
@@ -54,9 +55,10 @@ class CommentServiceTest {
         siteUser = createSiteUser();
         board = createBoard();
         post = createPost(board, siteUser);
-        parentComment_1 = createParentComment();
-        parentComment_2 = createParentComment();
-        p1s_childComment = createChildComment();
+        parentComment = createParentComment("parent");
+        parentCommentWithNullContent = createParentComment(null);
+        childComment = createChildComment(parentComment);
+        childCommentOfNullContentParent = createChildComment(parentCommentWithNullContent);
     }
 
     private SiteUser createSiteUser() {
@@ -89,19 +91,19 @@ class CommentServiceTest {
         return post;
     }
 
-    private Comment createParentComment() {
+    private Comment createParentComment(String content) {
         Comment comment = new Comment(
-                "parent"
+                content
         );
         comment.setPostAndSiteUser(post, siteUser);
         return comment;
     }
 
-    private Comment createChildComment() {
+    private Comment createChildComment(Comment parentComment) {
         Comment comment = new Comment(
                 "child"
         );
-        comment.setParentCommentAndPostAndSiteUser(parentComment_1, post, siteUser);
+        comment.setParentCommentAndPostAndSiteUser(parentComment, post, siteUser);
         return comment;
     }
 
@@ -112,7 +114,7 @@ class CommentServiceTest {
     @Test
     void 특정_게시글의_댓글들을_조회한다() {
         // Given
-        List<Comment> commentList = List.of(parentComment_1, p1s_childComment, parentComment_2);
+        List<Comment> commentList = List.of(parentComment, childComment, parentCommentWithNullContent);
         when(commentRepository.findCommentTreeByPostId(post.getId())).thenReturn(commentList);
 
         // When
@@ -141,18 +143,18 @@ class CommentServiceTest {
         );
         when(siteUserRepository.getByEmail(siteUser.getEmail())).thenReturn(siteUser);
         when(postRepository.getById(post.getId())).thenReturn(post);
-        when(commentRepository.save(any(Comment.class))).thenReturn(parentComment_1);
+        when(commentRepository.save(any(Comment.class))).thenReturn(parentComment);
 
         // When
         CommentCreateResponse commentCreateResponse = commentService.createComment(
                 siteUser.getEmail(), post.getId(), commentCreateRequest);
 
         // Then
-        assertEquals(commentCreateResponse, CommentCreateResponse.from(parentComment_1));
+        assertEquals(commentCreateResponse, CommentCreateResponse.from(parentComment));
         verify(commentRepository, times(0))
                 .getById(any(Long.class));
         verify(commentRepository, times(1))
-                .save(commentCreateRequest.toEntity(siteUser, post, parentComment_1));
+                .save(commentCreateRequest.toEntity(siteUser, post, parentComment));
     }
 
     @Test
@@ -164,19 +166,19 @@ class CommentServiceTest {
         );
         when(siteUserRepository.getByEmail(siteUser.getEmail())).thenReturn(siteUser);
         when(postRepository.getById(post.getId())).thenReturn(post);
-        when(commentRepository.getById(parentCommentId)).thenReturn(parentComment_1);
-        when(commentRepository.save(any(Comment.class))).thenReturn(p1s_childComment);
+        when(commentRepository.getById(parentCommentId)).thenReturn(parentComment);
+        when(commentRepository.save(any(Comment.class))).thenReturn(childComment);
 
         // When
         CommentCreateResponse commentCreateResponse = commentService.createComment(
                 siteUser.getEmail(), post.getId(), commentCreateRequest);
 
         // Then
-        assertEquals(commentCreateResponse, CommentCreateResponse.from(p1s_childComment));
+        assertEquals(commentCreateResponse, CommentCreateResponse.from(childComment));
         verify(commentRepository, times(1))
                 .getById(parentCommentId);
         verify(commentRepository, times(1))
-                .save(commentCreateRequest.toEntity(siteUser, post, parentComment_1));
+                .save(commentCreateRequest.toEntity(siteUser, post, parentComment));
     }
 
 
@@ -225,6 +227,29 @@ class CommentServiceTest {
                 .save(any(Comment.class));
     }
 
+    @Test
+    void 댓글을_등록할_때_대대댓글_부터는_예외_응답을_반환한다() {
+        // Given
+        Long childCommentId = 1L;
+        CommentCreateRequest commentCreateRequest = new CommentCreateRequest(
+                "child's child", childCommentId
+        );
+        when(siteUserRepository.getByEmail(siteUser.getEmail())).thenReturn(siteUser);
+        when(postRepository.getById(post.getId())).thenReturn(post);
+        when(commentRepository.getById(childCommentId)).thenReturn(childComment);
+
+        // When & Then
+        CustomException exception = assertThrows(CustomException.class, () ->
+                commentService.createComment(siteUser.getEmail(), post.getId(), commentCreateRequest)
+        );
+        assertThat(exception.getMessage())
+                .isEqualTo(INVALID_COMMENT_LEVEL.getMessage());
+        assertThat(exception.getCode())
+                .isEqualTo(INVALID_COMMENT_LEVEL.getCode());
+        verify(commentRepository, times(0))
+                .save(any(Comment.class));
+    }
+
     /**
      * 댓글 수정
      */
@@ -236,14 +261,14 @@ class CommentServiceTest {
         );
         when(siteUserRepository.getByEmail(siteUser.getEmail())).thenReturn(siteUser);
         when(postRepository.getById(post.getId())).thenReturn(post);
-        when(commentRepository.getById(any())).thenReturn(parentComment_1);
+        when(commentRepository.getById(any())).thenReturn(parentComment);
 
         // When
         CommentUpdateResponse commentUpdateResponse = commentService.updateComment(
-                siteUser.getEmail(), post.getId(), parentComment_1.getId(), commentUpdateRequest);
+                siteUser.getEmail(), post.getId(), parentComment.getId(), commentUpdateRequest);
 
         // Then
-        assertEquals(commentUpdateResponse.id(), parentComment_1.getId());
+        assertEquals(commentUpdateResponse.id(), parentComment.getId());
     }
 
     @Test
@@ -258,7 +283,7 @@ class CommentServiceTest {
 
         // When & Then
         CustomException exception = assertThrows(CustomException.class, () ->
-                commentService.updateComment(siteUser.getEmail(), invalidPostId, parentComment_1.getId(), commentUpdateRequest)
+                commentService.updateComment(siteUser.getEmail(), invalidPostId, parentComment.getId(), commentUpdateRequest)
         );
         assertThat(exception.getMessage())
                 .isEqualTo(INVALID_POST_ID.getMessage());
@@ -290,17 +315,17 @@ class CommentServiceTest {
     @Test
     void 댓글을_수정할_때_이미_삭제된_댓글이라면_예외_응답을_반환한다() {
         // Given
-        parentComment_1.deprecateComment();
+        parentComment.deprecateComment();
         CommentUpdateRequest commentUpdateRequest = new CommentUpdateRequest(
                 "update"
         );
         when(siteUserRepository.getByEmail(siteUser.getEmail())).thenReturn(siteUser);
         when(postRepository.getById(post.getId())).thenReturn(post);
-        when(commentRepository.getById(any())).thenReturn(parentComment_1);
+        when(commentRepository.getById(any())).thenReturn(parentComment);
 
         // When & Then
         CustomException exception = assertThrows(CustomException.class, () ->
-                commentService.updateComment(siteUser.getEmail(), post.getId(), parentComment_1.getId(), commentUpdateRequest)
+                commentService.updateComment(siteUser.getEmail(), post.getId(), parentComment.getId(), commentUpdateRequest)
         );
         assertThat(exception.getMessage())
                 .isEqualTo(CAN_NOT_UPDATE_DEPRECATED_COMMENT.getMessage());
@@ -317,11 +342,11 @@ class CommentServiceTest {
         );
         when(siteUserRepository.getByEmail(invalidEmail)).thenReturn(siteUser);
         when(postRepository.getById(post.getId())).thenReturn(post);
-        when(commentRepository.getById(any())).thenReturn(parentComment_1);
+        when(commentRepository.getById(any())).thenReturn(parentComment);
 
         // When & Then
         CustomException exception = assertThrows(CustomException.class, () ->
-                commentService.updateComment(invalidEmail, post.getId(), parentComment_1.getId(), commentUpdateRequest)
+                commentService.updateComment(invalidEmail, post.getId(), parentComment.getId(), commentUpdateRequest)
         );
         assertThat(exception.getMessage())
                 .isEqualTo(INVALID_POST_ACCESS.getMessage());
@@ -339,14 +364,14 @@ class CommentServiceTest {
         Long parentCommentId = 1L;
         when(siteUserRepository.getByEmail(siteUser.getEmail())).thenReturn(siteUser);
         when(postRepository.getById(post.getId())).thenReturn(post);
-        when(commentRepository.getById(any())).thenReturn(parentComment_1);
+        when(commentRepository.getById(any())).thenReturn(parentComment);
 
         // When
         CommentDeleteResponse commentDeleteResponse = commentService.deleteCommentById(
                 siteUser.getEmail(), post.getId(), parentCommentId);
 
         // Then
-        assertEquals(parentComment_1.getContent(), null);
+        assertEquals(parentComment.getContent(), null);
         assertEquals(commentDeleteResponse.id(), parentCommentId);
         verify(commentRepository, times(0)).deleteById(parentCommentId);
     }
@@ -357,7 +382,7 @@ class CommentServiceTest {
         Long childCommentId = 1L;
         when(siteUserRepository.getByEmail(siteUser.getEmail())).thenReturn(siteUser);
         when(postRepository.getById(post.getId())).thenReturn(post);
-        when(commentRepository.getById(any())).thenReturn(p1s_childComment);
+        when(commentRepository.getById(any())).thenReturn(childComment);
 
         // When
         CommentDeleteResponse commentDeleteResponse = commentService.deleteCommentById(
@@ -369,6 +394,41 @@ class CommentServiceTest {
     }
 
     @Test
+    void 대댓글을_삭제한다_부모댓글_유효() {
+        // Given
+        Long childCommentId = 1L;
+        when(siteUserRepository.getByEmail(siteUser.getEmail())).thenReturn(siteUser);
+        when(postRepository.getById(post.getId())).thenReturn(post);
+        when(commentRepository.getById(any())).thenReturn(childComment);
+
+        // When
+        CommentDeleteResponse commentDeleteResponse = commentService.deleteCommentById(
+                siteUser.getEmail(), post.getId(), childCommentId);
+
+        // Then
+        assertEquals(commentDeleteResponse.id(), childCommentId);
+        verify(commentRepository, times(1)).deleteById(childCommentId);
+    }
+
+    @Test
+    void 대댓글을_삭제한다_부모댓글_유효하지_않음() {
+        // Given
+
+        Long childCommentId = 1L;
+        when(siteUserRepository.getByEmail(siteUser.getEmail())).thenReturn(siteUser);
+        when(postRepository.getById(post.getId())).thenReturn(post);
+        when(commentRepository.getById(any())).thenReturn(childCommentOfNullContentParent);
+
+        // When
+        CommentDeleteResponse commentDeleteResponse = commentService.deleteCommentById(
+                siteUser.getEmail(), post.getId(), childCommentId);
+
+        // Then
+        assertEquals(commentDeleteResponse.id(), childCommentId);
+        verify(commentRepository, times(2)).deleteById(any());
+    }
+
+    @Test
     void 댓글을_삭제할_때_유효한_게시글이_아니라면_예외_응답을_반환한다() {
         // Given
         Long invalidPostId = -1L;
@@ -377,7 +437,7 @@ class CommentServiceTest {
 
         // When & Then
         CustomException exception = assertThrows(CustomException.class, () ->
-                commentService.deleteCommentById(siteUser.getEmail(), invalidPostId, parentComment_1.getId())
+                commentService.deleteCommentById(siteUser.getEmail(), invalidPostId, parentComment.getId())
         );
         assertThat(exception.getMessage())
                 .isEqualTo(INVALID_POST_ID.getMessage());
@@ -409,11 +469,11 @@ class CommentServiceTest {
         String invalidEmail = "invalidEmail@test.com";
         when(siteUserRepository.getByEmail(invalidEmail)).thenReturn(siteUser);
         when(postRepository.getById(post.getId())).thenReturn(post);
-        when(commentRepository.getById(any())).thenReturn(parentComment_1);
+        when(commentRepository.getById(any())).thenReturn(parentComment);
 
         // When & Then
         CustomException exception = assertThrows(CustomException.class, () ->
-                commentService.deleteCommentById(invalidEmail, post.getId(), parentComment_1.getId())
+                commentService.deleteCommentById(invalidEmail, post.getId(), parentComment.getId())
         );
         assertThat(exception.getMessage())
                 .isEqualTo(INVALID_POST_ACCESS.getMessage());

@@ -3,15 +3,15 @@ package com.example.solidconnection.comment.dto;
 import com.example.solidconnection.comment.domain.Comment;
 import com.example.solidconnection.siteuser.dto.PostFindSiteUserResponse;
 
-import java.time.LocalDateTime;
+import java.time.ZonedDateTime;
 
 public record PostFindCommentResponse(
         Long id,
         Long parentId,
         String content,
         Boolean isOwner,
-        LocalDateTime createdAt,
-        LocalDateTime updatedAt,
+        ZonedDateTime createdAt,
+        ZonedDateTime updatedAt,
         PostFindSiteUserResponse postFindSiteUserResponse
 
 ) {
