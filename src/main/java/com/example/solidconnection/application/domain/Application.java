@@ -48,6 +48,9 @@ public class Application {
     @Column(columnDefinition = "int not null default 0")
     private Integer updateCount;
 
+    @Column(length = 50, nullable = false)
+    private String term;
+
     @ManyToOne
     private UniversityInfoForApply firstChoiceUniversity;
 
@@ -63,10 +66,14 @@ public class Application {
     public Application(
             SiteUser siteUser,
             Gpa gpa,
-            LanguageTest languageTest) {
+            LanguageTest languageTest,
+            String term) {
         this.siteUser = siteUser;
         this.gpa = gpa;
         this.languageTest = languageTest;
+        this.term = term;
+        this.updateCount = 0;
+        this.verifyStatus = PENDING;
     }
 
     public void updateGpaAndLanguageTest(

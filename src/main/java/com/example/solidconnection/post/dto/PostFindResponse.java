@@ -6,7 +6,7 @@ import com.example.solidconnection.dto.*;
 import com.example.solidconnection.post.domain.Post;
 import com.example.solidconnection.siteuser.dto.PostFindSiteUserResponse;
 
-import java.time.LocalDateTime;
+import java.time.ZonedDateTime;
 import java.util.List;
 
 public record PostFindResponse(
@@ -20,8 +20,8 @@ public record PostFindResponse(
         String postCategory,
         Boolean isOwner,
         Boolean isLiked,
-        LocalDateTime createdAt,
-        LocalDateTime updatedAt,
+        ZonedDateTime createdAt,
+        ZonedDateTime updatedAt,
         PostFindBoardResponse postFindBoardResponse,
         PostFindSiteUserResponse postFindSiteUserResponse,
         List<PostFindCommentResponse> postFindCommentResponses,

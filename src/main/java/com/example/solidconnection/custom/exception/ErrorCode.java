@@ -50,6 +50,7 @@ public enum ErrorCode {
     APPLY_UPDATE_LIMIT_EXCEED(HttpStatus.BAD_REQUEST.value(), "지원 정보 수정은 " + APPLICATION_UPDATE_COUNT_LIMIT + "회까지만 가능합니다."),
     CANT_APPLY_FOR_SAME_UNIVERSITY(HttpStatus.BAD_REQUEST.value(), "1, 2, 3지망에 동일한 대학교를 입력할 수 없습니다."),
     CAN_NOT_CHANGE_NICKNAME_YET(HttpStatus.BAD_REQUEST.value(), "마지막 닉네임 변경으로부터 " + MIN_DAYS_BETWEEN_NICKNAME_CHANGES + "일이 지나지 않았습니다."),
+    PROFILE_IMAGE_NEEDED(HttpStatus.BAD_REQUEST.value(), "프로필 이미지가 필요합니다."),
 
     // community
     INVALID_POST_CATEGORY(HttpStatus.BAD_REQUEST.value(),"잘못된 카테고리명입니다."),
@@ -59,6 +60,7 @@ public enum ErrorCode {
     CAN_NOT_DELETE_OR_UPDATE_QUESTION(HttpStatus.BAD_REQUEST.value(), "질문글은 수정이나 삭제할 수 없습니다."),
     CAN_NOT_UPLOAD_MORE_THAN_FIVE_IMAGES(HttpStatus.BAD_REQUEST.value(), "5개 이상의 파일을 업로드할 수 없습니다."),
     INVALID_COMMENT_ID(HttpStatus.BAD_REQUEST.value(), "존재하지 않는 댓글입니다."),
+    INVALID_COMMENT_LEVEL(HttpStatus.BAD_REQUEST.value(), "최대 대댓글까지만 작성할 수 있습니다."),
     INVALID_COMMENT_ACCESS(HttpStatus.BAD_REQUEST.value(), "자신의 댓글만 제어할 수 있습니다."),
     CAN_NOT_UPDATE_DEPRECATED_COMMENT(HttpStatus.BAD_REQUEST.value(),"이미 삭제된 댓글을 수정할 수 없습니다."),
     INVALID_POST_LIKE(HttpStatus.BAD_REQUEST.value(), "존재하지 않는 게시글 좋아요입니다."),
