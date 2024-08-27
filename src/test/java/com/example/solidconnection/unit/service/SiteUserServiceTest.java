@@ -49,6 +49,7 @@ public class SiteUserServiceTest {
     private SiteUser siteUser;
     private MultipartFile imageFile;
     private UploadedFileUrlResponse uploadedFileUrlResponse;
+    private final String defaultProfileImageUrl = "http://k.kakaocdn.net/dn/o2c5A/btsASaNh2Lr/Xum5kRyuErD8LIuLQEWfC0/img_640x640.jpg";
 
     @BeforeEach
     void setUp() {
@@ -62,7 +63,7 @@ public class SiteUserServiceTest {
         return new SiteUser(
                 "test@example.com",
                 "nickname",
-                "http://example.com/profile.jpg",
+                "https://solid-connection-uploaded.s3.ap-northeast-2.amazonaws.com/profile/abcd",
                 "1999-01-01",
                 PreparationStatus.CONSIDERING,
                 Role.MENTEE,
@@ -78,6 +79,40 @@ public class SiteUserServiceTest {
 
     private UploadedFileUrlResponse createUploadedFileUrlResponse() {
         return new UploadedFileUrlResponse("https://s3.example.com/test1.png");
+    }
+
+    @Test
+    void 초기_프로필_이미지를_수정한다_kakao() {
+        siteUser.setProfileImageUrl(defaultProfileImageUrl);
+        when(siteUserRepository.getByEmail(siteUser.getEmail())).thenReturn(siteUser);
+        when(s3Service.uploadFile(imageFile, ImgType.PROFILE)).thenReturn(uploadedFileUrlResponse);
+
+        // When
+        ProfileImageUpdateResponse profileImageUpdateResponse =
+                siteUserService.updateProfileImage(siteUser.getEmail(), imageFile);
+        // Then
+        assertEquals(profileImageUpdateResponse, ProfileImageUpdateResponse.from(siteUser));
+        verify(siteUserRepository, times(1)).getByEmail(siteUser.getEmail());
+        verify(s3Service, times(0)).deleteExProfile(siteUser.getEmail());
+        verify(s3Service, times(1)).uploadFile(imageFile, ImgType.PROFILE);
+        verify(siteUserRepository, times(1)).save(any(SiteUser.class));
+    }
+
+    @Test
+    void 초기_프로필_이미지를_수정한다_null() {
+        siteUser.setProfileImageUrl(null);
+        when(siteUserRepository.getByEmail(siteUser.getEmail())).thenReturn(siteUser);
+        when(s3Service.uploadFile(imageFile, ImgType.PROFILE)).thenReturn(uploadedFileUrlResponse);
+
+        // When
+        ProfileImageUpdateResponse profileImageUpdateResponse =
+                siteUserService.updateProfileImage(siteUser.getEmail(), imageFile);
+        // Then
+        assertEquals(profileImageUpdateResponse, ProfileImageUpdateResponse.from(siteUser));
+        verify(siteUserRepository, times(1)).getByEmail(siteUser.getEmail());
+        verify(s3Service, times(0)).deleteExProfile(siteUser.getEmail());
+        verify(s3Service, times(1)).uploadFile(imageFile, ImgType.PROFILE);
+        verify(siteUserRepository, times(1)).save(any(SiteUser.class));
     }
 
     @Test

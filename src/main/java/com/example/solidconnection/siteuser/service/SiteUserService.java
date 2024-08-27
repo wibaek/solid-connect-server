@@ -88,7 +88,10 @@ public class SiteUserService {
         SiteUser siteUser = siteUserRepository.getByEmail(email);
         validateProfileImage(imageFile);
 
-        s3Service.deleteExProfile(email);
+        // 프로필 이미지를 처음 수정하는 경우에는 deleteExProfile 수행하지 않음
+        if(!isDefaultProfileImage(siteUser.getProfileImageUrl())){
+            s3Service.deleteExProfile(email);
+        }
         UploadedFileUrlResponse uploadedFileUrlResponse = s3Service.uploadFile(imageFile, ImgType.PROFILE);
         siteUser.setProfileImageUrl(uploadedFileUrlResponse.fileUrl());
         siteUserRepository.save(siteUser);
@@ -100,6 +103,11 @@ public class SiteUserService {
         if (imageFile == null || imageFile.isEmpty()) {
             throw new CustomException(PROFILE_IMAGE_NEEDED);
         }
+    }
+
+    private boolean isDefaultProfileImage(String profileImageUrl) {
+        String prefix = "https://solid-connection-uploaded.s3.ap-northeast-2.amazonaws.com/profile/";
+        return profileImageUrl == null || !profileImageUrl.startsWith(prefix);
     }
 
     /*
