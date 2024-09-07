@@ -6,6 +6,7 @@ import com.example.solidconnection.application.domain.LanguageTest;
 import com.example.solidconnection.application.dto.ScoreRequest;
 import com.example.solidconnection.application.dto.UniversityChoiceRequest;
 import com.example.solidconnection.application.repository.ApplicationRepository;
+import com.example.solidconnection.cache.annotation.DefaultCacheOut;
 import com.example.solidconnection.custom.exception.CustomException;
 import com.example.solidconnection.siteuser.domain.SiteUser;
 import com.example.solidconnection.siteuser.repository.SiteUserRepository;
@@ -40,6 +41,7 @@ public class ApplicationSubmissionService {
      * - 수정을 하고 나면, 성적 승인 상태(verifyStatus)를 PENDING 상태로 변경한다.
      * */
     @Transactional
+    @DefaultCacheOut(key = "application:query", cacheManager = "customCacheManager", prefix = true)
     public boolean submitScore(String email, ScoreRequest scoreRequest) {
         SiteUser siteUser = siteUserRepository.getByEmail(email);
         Gpa gpa = scoreRequest.toGpa();
@@ -67,8 +69,9 @@ public class ApplicationSubmissionService {
      *   - 성적 승인 상태(verifyStatus) 는 변경하지 않는다.
      * */
     @Transactional
+    @DefaultCacheOut(key = "application:query", cacheManager = "customCacheManager", prefix = true)
     public boolean submitUniversityChoice(String email, UniversityChoiceRequest universityChoiceRequest) {
-        validateNoDuplicateUniversityChoices(universityChoiceRequest);
+        validateUniversityChoices(universityChoiceRequest);
 
         // 성적 제출한 적이 한번도 없는 경우
         Application existingApplication = applicationRepository.findTop1BySiteUser_EmailOrderByTermDesc(email)
@@ -83,14 +86,16 @@ public class ApplicationSubmissionService {
                 })
                 .orElse(existingApplication); // 금학기에 이미 성적 제출한 경우 기존 객체 사용
 
+        validateUpdateLimitNotExceed(application);
+
         UniversityInfoForApply firstChoiceUniversity = universityInfoForApplyRepository
                 .getUniversityInfoForApplyByIdAndTerm(universityChoiceRequest.firstChoiceUniversityId(), term);
-        UniversityInfoForApply secondChoiceUniversity = universityInfoForApplyRepository
-                .getUniversityInfoForApplyByIdAndTerm(universityChoiceRequest.secondChoiceUniversityId(), term);
-        UniversityInfoForApply thirdChoiceUniversity = universityInfoForApplyRepository
-                .getUniversityInfoForApplyByIdAndTerm(universityChoiceRequest.thirdChoiceUniversityId(), term);
-
-        validateUpdateLimitNotExceed(application);
+        UniversityInfoForApply secondChoiceUniversity = Optional.ofNullable(universityChoiceRequest.secondChoiceUniversityId())
+                .map(id -> universityInfoForApplyRepository.getUniversityInfoForApplyByIdAndTerm(id, term))
+                .orElse(null);
+        UniversityInfoForApply thirdChoiceUniversity = Optional.ofNullable(universityChoiceRequest.thirdChoiceUniversityId())
+                .map(id -> universityInfoForApplyRepository.getUniversityInfoForApplyByIdAndTerm(id, term))
+                .orElse(null);
         application.updateUniversityChoice(firstChoiceUniversity, secondChoiceUniversity, thirdChoiceUniversity, getRandomNickname());
         return true;
     }
@@ -109,14 +114,21 @@ public class ApplicationSubmissionService {
         }
     }
 
-    private void validateNoDuplicateUniversityChoices(UniversityChoiceRequest universityChoiceRequest) {
+    // 입력값 유효성 검증
+    private void validateUniversityChoices(UniversityChoiceRequest universityChoiceRequest) {
         Set<Long> uniqueUniversityIds = new HashSet<>();
-
         uniqueUniversityIds.add(universityChoiceRequest.firstChoiceUniversityId());
-        uniqueUniversityIds.add(universityChoiceRequest.secondChoiceUniversityId());
-        uniqueUniversityIds.add(universityChoiceRequest.thirdChoiceUniversityId());
+        if (universityChoiceRequest.secondChoiceUniversityId() != null) {
+            addUniversityChoice(uniqueUniversityIds, universityChoiceRequest.secondChoiceUniversityId());
+        }
+        if (universityChoiceRequest.thirdChoiceUniversityId() != null) {
+            addUniversityChoice(uniqueUniversityIds, universityChoiceRequest.thirdChoiceUniversityId());
+        }
+    }
 
-        if (uniqueUniversityIds.size() < 3) {
+    private void addUniversityChoice(Set<Long> uniqueUniversityIds, Long universityId) {
+        boolean notAdded = !uniqueUniversityIds.add(universityId);
+        if (notAdded) {
             throw new CustomException(CANT_APPLY_FOR_SAME_UNIVERSITY);
         }
     }
