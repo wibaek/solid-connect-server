@@ -9,10 +9,12 @@ import org.springframework.stereotype.Service;
 import java.util.Collections;
 import java.util.concurrent.TimeUnit;
 
-import static com.example.solidconnection.type.RedisConstants.*;
+import static com.example.solidconnection.type.RedisConstants.VALIDATE_VIEW_COUNT_TTL;
+import static com.example.solidconnection.type.RedisConstants.VIEW_COUNT_TTL;
 
 @Service
 public class RedisService {
+
     private final RedisTemplate<String, String> redisTemplate;
     private final RedisScript<Long> incrViewCountLuaScript;
 
@@ -28,7 +30,7 @@ public class RedisService {
         redisTemplate.execute(incrViewCountLuaScript, Collections.singletonList(key), VIEW_COUNT_TTL.getValue());
     }
 
-    public void deleteKey(String key){
+    public void deleteKey(String key) {
         redisTemplate.opsForValue().getAndDelete(key);
     }
 

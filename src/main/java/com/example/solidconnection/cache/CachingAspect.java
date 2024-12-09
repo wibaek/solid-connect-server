@@ -15,6 +15,7 @@ import org.springframework.stereotype.Component;
 @Component
 @RequiredArgsConstructor
 public class CachingAspect {
+
     private final ApplicationContext applicationContext;
     private final RedisUtils redisUtils;
 
@@ -47,7 +48,7 @@ public class CachingAspect {
 
             if (usingPrefix) {
                 cacheManager.evictUsingPrefix(cacheKey);
-            }else{
+            } else {
                 cacheManager.evict(cacheKey);
             }
         }
