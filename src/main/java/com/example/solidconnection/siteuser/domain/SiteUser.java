@@ -3,11 +3,25 @@ package com.example.solidconnection.siteuser.domain;
 import com.example.solidconnection.comment.domain.Comment;
 import com.example.solidconnection.post.domain.Post;
 import com.example.solidconnection.post.domain.PostLike;
+import com.example.solidconnection.score.domain.GpaScore;
+import com.example.solidconnection.score.domain.LanguageTestScore;
 import com.example.solidconnection.type.Gender;
 import com.example.solidconnection.type.PreparationStatus;
 import com.example.solidconnection.type.Role;
-import jakarta.persistence.*;
-import lombok.*;
+import jakarta.persistence.CascadeType;
+import jakarta.persistence.Column;
+import jakarta.persistence.Entity;
+import jakarta.persistence.EnumType;
+import jakarta.persistence.Enumerated;
+import jakarta.persistence.GeneratedValue;
+import jakarta.persistence.GenerationType;
+import jakarta.persistence.Id;
+import jakarta.persistence.OneToMany;
+import lombok.AccessLevel;
+import lombok.AllArgsConstructor;
+import lombok.Getter;
+import lombok.NoArgsConstructor;
+import lombok.Setter;
 
 import java.time.LocalDate;
 import java.time.LocalDateTime;
@@ -64,6 +78,13 @@ public class SiteUser {
 
     @OneToMany(mappedBy = "siteUser", cascade = CascadeType.ALL, orphanRemoval = true)
     private List<PostLike> postLikeList = new ArrayList<>();
+
+    @OneToMany(mappedBy = "siteUser", cascade = CascadeType.ALL, orphanRemoval = true)
+    private List<LanguageTestScore> languageTestScoreList = new ArrayList<>();
+
+    @OneToMany(mappedBy = "siteUser", cascade = CascadeType.ALL, orphanRemoval = true)
+    private List<GpaScore> gpaScoreList = new ArrayList<>();
+
 
     public SiteUser(
             String email,

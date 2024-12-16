@@ -53,7 +53,7 @@ public enum ErrorCode {
     PROFILE_IMAGE_NEEDED(HttpStatus.BAD_REQUEST.value(), "프로필 이미지가 필요합니다."),
 
     // community
-    INVALID_POST_CATEGORY(HttpStatus.BAD_REQUEST.value(),"잘못된 카테고리명입니다."),
+    INVALID_POST_CATEGORY(HttpStatus.BAD_REQUEST.value(), "잘못된 카테고리명입니다."),
     INVALID_BOARD_CODE(HttpStatus.BAD_REQUEST.value(), "잘못된 게시판 코드입니다."),
     INVALID_POST_ID(HttpStatus.BAD_REQUEST.value(), "존재하지 않는 게시글입니다."),
     INVALID_POST_ACCESS(HttpStatus.BAD_REQUEST.value(), "자신의 게시글만 제어할 수 있습니다."),
@@ -62,9 +62,16 @@ public enum ErrorCode {
     INVALID_COMMENT_ID(HttpStatus.BAD_REQUEST.value(), "존재하지 않는 댓글입니다."),
     INVALID_COMMENT_LEVEL(HttpStatus.BAD_REQUEST.value(), "최대 대댓글까지만 작성할 수 있습니다."),
     INVALID_COMMENT_ACCESS(HttpStatus.BAD_REQUEST.value(), "자신의 댓글만 제어할 수 있습니다."),
-    CAN_NOT_UPDATE_DEPRECATED_COMMENT(HttpStatus.BAD_REQUEST.value(),"이미 삭제된 댓글을 수정할 수 없습니다."),
+    CAN_NOT_UPDATE_DEPRECATED_COMMENT(HttpStatus.BAD_REQUEST.value(), "이미 삭제된 댓글을 수정할 수 없습니다."),
     INVALID_POST_LIKE(HttpStatus.BAD_REQUEST.value(), "존재하지 않는 게시글 좋아요입니다."),
     DUPLICATE_POST_LIKE(HttpStatus.BAD_REQUEST.value(), "이미 좋아요한 게시글입니다."),
+
+    // score
+    INVALID_GPA_SCORE(HttpStatus.BAD_REQUEST.value(), "존재하지 않는 학점입니다."),
+    INVALID_GPA_SCORE_STATUS(HttpStatus.BAD_REQUEST.value(), "학점이 승인되지 않았습니다."),
+    INVALID_LANGUAGE_TEST_SCORE(HttpStatus.BAD_REQUEST.value(), "존재하지 않는 어학성적입니다."),
+    INVALID_LANGUAGE_TEST_SCORE_STATUS(HttpStatus.BAD_REQUEST.value(), "어학성적이 승인되지 않았습니다."),
+    USER_DO_NOT_HAVE_GPA(HttpStatus.BAD_REQUEST.value(), "해당 유저의 학점을 찾을 수 없음"),
 
     // general
     JSON_PARSING_FAILED(HttpStatus.BAD_REQUEST.value(), "JSON 파싱을 할 수 없습니다."),

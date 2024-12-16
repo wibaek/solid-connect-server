@@ -23,21 +23,6 @@ import static com.example.solidconnection.custom.exception.ErrorCode.INVALID_POS
 public class BoardService {
     private final BoardRepository boardRepository;
 
-    private String validateCode(String code) {
-        try {
-            return String.valueOf(BoardCode.valueOf(code));
-        } catch (IllegalArgumentException ex) {
-            throw new CustomException(ErrorCode.INVALID_BOARD_CODE);
-        }
-    }
-
-    private PostCategory validatePostCategory(String category){
-        if(!EnumUtils.isValidEnum(PostCategory.class, category)){
-            throw new CustomException(INVALID_POST_CATEGORY);
-        }
-        return PostCategory.valueOf(category);
-    }
-
     @Transactional(readOnly = true)
     public List<BoardFindPostResponse> findPostsByCodeAndPostCategory(String code, String category) {
 
@@ -48,6 +33,21 @@ public class BoardService {
         List<Post> postList = getPostListByPostCategory(board.getPostList(), postCategory);
 
         return BoardFindPostResponse.from(postList);
+    }
+
+    private String validateCode(String code) {
+        try {
+            return String.valueOf(BoardCode.valueOf(code));
+        } catch (IllegalArgumentException ex) {
+            throw new CustomException(ErrorCode.INVALID_BOARD_CODE);
+        }
+    }
+
+    private PostCategory validatePostCategory(String category) {
+        if (!EnumUtils.isValidEnum(PostCategory.class, category)) {
+            throw new CustomException(INVALID_POST_CATEGORY);
+        }
+        return PostCategory.valueOf(category);
     }
 
     private List<Post> getPostListByPostCategory(List<Post> postList, PostCategory postCategory) {

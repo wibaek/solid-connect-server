@@ -6,6 +6,8 @@ import com.example.solidconnection.siteuser.domain.SiteUser;
 import com.example.solidconnection.type.VerifyStatus;
 import com.example.solidconnection.university.domain.UniversityInfoForApply;
 import org.springframework.data.jpa.repository.JpaRepository;
+import org.springframework.data.jpa.repository.Query;
+import org.springframework.data.repository.query.Param;
 import org.springframework.stereotype.Repository;
 
 import java.util.List;
@@ -18,15 +20,22 @@ public interface ApplicationRepository extends JpaRepository<Application, Long> 
 
     boolean existsByNicknameForApply(String nicknameForApply);
 
-    Optional<Application> findTop1BySiteUser_EmailOrderByTermDesc(String email);
+    List<Application> findAllByFirstChoiceUniversityAndVerifyStatusAndTerm(
+            UniversityInfoForApply firstChoiceUniversity, VerifyStatus verifyStatus, String term);
 
-    Optional<Application> findBySiteUserAndTerm(SiteUser siteUser, String term);
+    List<Application> findAllBySecondChoiceUniversityAndVerifyStatusAndTerm(
+            UniversityInfoForApply secondChoiceUniversity, VerifyStatus verifyStatus, String term);
 
-    List<Application> findAllByFirstChoiceUniversityAndVerifyStatusAndTerm(UniversityInfoForApply firstChoiceUniversity, VerifyStatus verifyStatus, String term);
+    List<Application> findAllByThirdChoiceUniversityAndVerifyStatusAndTerm(
+            UniversityInfoForApply thirdChoiceUniversity, VerifyStatus verifyStatus, String term);
 
-    List<Application> findAllBySecondChoiceUniversityAndVerifyStatusAndTerm(UniversityInfoForApply secondChoiceUniversity, VerifyStatus verifyStatus, String term);
-
-    List<Application> findAllByThirdChoiceUniversityAndVerifyStatusAndTerm(UniversityInfoForApply thirdChoiceUniversity, VerifyStatus verifyStatus, String term);
+    @Query("""
+        SELECT a FROM Application a
+        WHERE a.siteUser = :siteUser
+        AND a.term = :term
+        AND a.isDelete = false
+    """)
+    Optional<Application> findBySiteUserAndTerm(@Param("siteUser") SiteUser siteUser, @Param("term") String term);
 
     default Application getApplicationBySiteUserAndTerm(SiteUser siteUser, String term) {
         return findBySiteUserAndTerm(siteUser, term)

@@ -4,7 +4,11 @@ import com.example.solidconnection.custom.exception.CustomException;
 import com.example.solidconnection.s3.S3Service;
 import com.example.solidconnection.s3.UploadedFileUrlResponse;
 import com.example.solidconnection.siteuser.domain.SiteUser;
-import com.example.solidconnection.siteuser.dto.*;
+import com.example.solidconnection.siteuser.dto.MyPageResponse;
+import com.example.solidconnection.siteuser.dto.MyPageUpdateResponse;
+import com.example.solidconnection.siteuser.dto.NicknameUpdateRequest;
+import com.example.solidconnection.siteuser.dto.NicknameUpdateResponse;
+import com.example.solidconnection.siteuser.dto.ProfileImageUpdateResponse;
 import com.example.solidconnection.siteuser.repository.LikedUniversityRepository;
 import com.example.solidconnection.siteuser.repository.SiteUserRepository;
 import com.example.solidconnection.type.ImgType;
@@ -19,7 +23,9 @@ import java.time.LocalDateTime;
 import java.time.format.DateTimeFormatter;
 import java.util.List;
 
-import static com.example.solidconnection.custom.exception.ErrorCode.*;
+import static com.example.solidconnection.custom.exception.ErrorCode.CAN_NOT_CHANGE_NICKNAME_YET;
+import static com.example.solidconnection.custom.exception.ErrorCode.NICKNAME_ALREADY_EXISTED;
+import static com.example.solidconnection.custom.exception.ErrorCode.PROFILE_IMAGE_NEEDED;
 
 @RequiredArgsConstructor
 @Service
@@ -51,22 +57,6 @@ public class SiteUserService {
         return MyPageUpdateResponse.from(siteUser);
     }
 
-    private void validateNicknameDuplicated(String nickname) {
-        if (siteUserRepository.existsByNickname(nickname)) {
-            throw new CustomException(NICKNAME_ALREADY_EXISTED);
-        }
-    }
-    private void validateNicknameNotChangedRecently(LocalDateTime lastModifiedAt) {
-        if (lastModifiedAt == null) {
-            return;
-        }
-        if (LocalDateTime.now().isBefore(lastModifiedAt.plusDays(MIN_DAYS_BETWEEN_NICKNAME_CHANGES))) {
-            String formatLastModifiedAt
-                    = String.format("(마지막 수정 시간 : %s)", NICKNAME_LAST_CHANGE_DATE_FORMAT.format(lastModifiedAt));
-            throw new CustomException(CAN_NOT_CHANGE_NICKNAME_YET, formatLastModifiedAt);
-        }
-    }
-
     /*
      * 관심 대학교 목록을 조회한다.
      * */
@@ -79,7 +69,6 @@ public class SiteUserService {
                 .toList();
     }
 
-
     /*
      * 프로필 이미지를 수정한다.
      * */
@@ -89,7 +78,7 @@ public class SiteUserService {
         validateProfileImage(imageFile);
 
         // 프로필 이미지를 처음 수정하는 경우에는 deleteExProfile 수행하지 않음
-        if(!isDefaultProfileImage(siteUser.getProfileImageUrl())){
+        if (!isDefaultProfileImage(siteUser.getProfileImageUrl())) {
             s3Service.deleteExProfile(email);
         }
         UploadedFileUrlResponse uploadedFileUrlResponse = s3Service.uploadFile(imageFile, ImgType.PROFILE);
@@ -104,7 +93,6 @@ public class SiteUserService {
             throw new CustomException(PROFILE_IMAGE_NEEDED);
         }
     }
-
     private boolean isDefaultProfileImage(String profileImageUrl) {
         String prefix = "profile/";
         return profileImageUrl == null || !profileImageUrl.startsWith(prefix);
@@ -125,5 +113,22 @@ public class SiteUserService {
         siteUserRepository.save(siteUser);
 
         return NicknameUpdateResponse.from(siteUser);
+    }
+
+    private void validateNicknameDuplicated(String nickname) {
+        if (siteUserRepository.existsByNickname(nickname)) {
+            throw new CustomException(NICKNAME_ALREADY_EXISTED);
+        }
+    }
+
+    private void validateNicknameNotChangedRecently(LocalDateTime lastModifiedAt) {
+        if (lastModifiedAt == null) {
+            return;
+        }
+        if (LocalDateTime.now().isBefore(lastModifiedAt.plusDays(MIN_DAYS_BETWEEN_NICKNAME_CHANGES))) {
+            String formatLastModifiedAt
+                    = String.format("(마지막 수정 시간 : %s)", NICKNAME_LAST_CHANGE_DATE_FORMAT.format(lastModifiedAt));
+            throw new CustomException(CAN_NOT_CHANGE_NICKNAME_YET, formatLastModifiedAt);
+        }
     }
 }

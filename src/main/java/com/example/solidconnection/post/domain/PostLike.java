@@ -1,7 +1,13 @@
 package com.example.solidconnection.post.domain;
 
 import com.example.solidconnection.siteuser.domain.SiteUser;
-import jakarta.persistence.*;
+import jakarta.persistence.Entity;
+import jakarta.persistence.FetchType;
+import jakarta.persistence.GeneratedValue;
+import jakarta.persistence.GenerationType;
+import jakarta.persistence.Id;
+import jakarta.persistence.JoinColumn;
+import jakarta.persistence.ManyToOne;
 import lombok.EqualsAndHashCode;
 import lombok.Getter;
 import lombok.NoArgsConstructor;
@@ -11,6 +17,7 @@ import lombok.NoArgsConstructor;
 @NoArgsConstructor
 @EqualsAndHashCode(of = "id")
 public class PostLike {
+
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     private Long id;
@@ -24,7 +31,6 @@ public class PostLike {
     private SiteUser siteUser;
 
     public void setPostAndSiteUser(Post post, SiteUser siteUser) {
-
         if (this.post != null) {
             this.post.getPostLikeList().remove(this);
         }
@@ -39,7 +45,6 @@ public class PostLike {
     }
 
     public void resetPostAndSiteUser() {
-
         if (this.post != null) {
             this.post.getPostLikeList().remove(this);
         }

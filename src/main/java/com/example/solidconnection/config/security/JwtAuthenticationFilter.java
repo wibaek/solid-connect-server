@@ -29,6 +29,7 @@ public class JwtAuthenticationFilter extends OncePerRequestFilter {
 
     public static final String TOKEN_HEADER = "Authorization";
     public static final String TOKEN_PREFIX = "Bearer ";
+
     private final TokenService tokenService;
     private final TokenValidator tokenValidator;
     private final JwtAuthenticationEntryPoint jwtAuthenticationEntryPoint;
@@ -106,10 +107,6 @@ public class JwtAuthenticationFilter extends OncePerRequestFilter {
 
         // 대학교 정보
         permitAllEndpoints.add("/university/search/**");
-
-        // API 문서
-        permitAllEndpoints.add("/swagger-ui/**");
-        permitAllEndpoints.add("/v3/api-docs/**");
 
         return permitAllEndpoints;
     }

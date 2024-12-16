@@ -1,8 +1,13 @@
 package com.example.solidconnection.comment.service;
 
-import com.example.solidconnection.comment.dto.*;
-import com.example.solidconnection.comment.repository.CommentRepository;
 import com.example.solidconnection.comment.domain.Comment;
+import com.example.solidconnection.comment.dto.CommentCreateRequest;
+import com.example.solidconnection.comment.dto.CommentCreateResponse;
+import com.example.solidconnection.comment.dto.CommentDeleteResponse;
+import com.example.solidconnection.comment.dto.CommentUpdateRequest;
+import com.example.solidconnection.comment.dto.CommentUpdateResponse;
+import com.example.solidconnection.comment.dto.PostFindCommentResponse;
+import com.example.solidconnection.comment.repository.CommentRepository;
 import com.example.solidconnection.custom.exception.CustomException;
 import com.example.solidconnection.post.domain.Post;
 import com.example.solidconnection.post.repository.PostRepository;
@@ -15,7 +20,9 @@ import org.springframework.transaction.annotation.Transactional;
 import java.util.List;
 import java.util.stream.Collectors;
 
-import static com.example.solidconnection.custom.exception.ErrorCode.*;
+import static com.example.solidconnection.custom.exception.ErrorCode.CAN_NOT_UPDATE_DEPRECATED_COMMENT;
+import static com.example.solidconnection.custom.exception.ErrorCode.INVALID_COMMENT_LEVEL;
+import static com.example.solidconnection.custom.exception.ErrorCode.INVALID_POST_ACCESS;
 
 @Service
 @RequiredArgsConstructor
@@ -25,35 +32,16 @@ public class CommentService {
     private final SiteUserRepository siteUserRepository;
     private final PostRepository postRepository;
 
-    private Boolean isOwner(Comment comment, String email) {
-        return comment.getSiteUser().getEmail().equals(email);
-    }
-
-    private void validateOwnership(Comment comment, String email) {
-        if (!comment.getSiteUser().getEmail().equals(email)) {
-            throw new CustomException(INVALID_POST_ACCESS);
-        }
-    }
-
-    private void validateDeprecated(Comment comment) {
-        if (comment.getContent() == null) {
-            throw new CustomException(CAN_NOT_UPDATE_DEPRECATED_COMMENT);
-        }
-    }
-
-    // 대대댓글부터 허용하지 않음
-    private void validateCommentDepth(Comment parentComment) {
-        if (parentComment.getParentComment() != null) {
-            throw new CustomException(INVALID_COMMENT_LEVEL);
-        }
-    }
-
     @Transactional(readOnly = true)
     public List<PostFindCommentResponse> findCommentsByPostId(String email, Long postId) {
         return commentRepository.findCommentTreeByPostId(postId)
                 .stream()
                 .map(comment -> PostFindCommentResponse.from(isOwner(comment, email), comment))
                 .collect(Collectors.toList());
+    }
+
+    private Boolean isOwner(Comment comment, String email) {
+        return comment.getSiteUser().getEmail().equals(email);
     }
 
     @Transactional
@@ -72,6 +60,13 @@ public class CommentService {
         return CommentCreateResponse.from(createdComment);
     }
 
+    // 대대댓글부터 허용하지 않음
+    private void validateCommentDepth(Comment parentComment) {
+        if (parentComment.getParentComment() != null) {
+            throw new CustomException(INVALID_COMMENT_LEVEL);
+        }
+    }
+
     @Transactional
     public CommentUpdateResponse updateComment(String email, Long postId, Long commentId, CommentUpdateRequest commentUpdateRequest) {
 
@@ -84,6 +79,12 @@ public class CommentService {
         comment.updateContent(commentUpdateRequest.content());
 
         return CommentUpdateResponse.from(comment);
+    }
+
+    private void validateDeprecated(Comment comment) {
+        if (comment.getContent() == null) {
+            throw new CustomException(CAN_NOT_UPDATE_DEPRECATED_COMMENT);
+        }
     }
 
     @Transactional
@@ -116,5 +117,11 @@ public class CommentService {
             }
         }
         return new CommentDeleteResponse(commentId);
+    }
+
+    private void validateOwnership(Comment comment, String email) {
+        if (!comment.getSiteUser().getEmail().equals(email)) {
+            throw new CustomException(INVALID_POST_ACCESS);
+        }
     }
 }

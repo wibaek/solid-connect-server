@@ -1,5 +1,6 @@
 package com.example.solidconnection.config.security;
 
+import com.example.solidconnection.config.cors.CorsPropertiesConfig;
 import lombok.RequiredArgsConstructor;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
@@ -23,11 +24,12 @@ import java.util.Arrays;
 public class SecurityConfiguration {
 
     private final JwtAuthenticationFilter jwtAuthenticationFilter;
+    private final CorsPropertiesConfig corsProperties;
 
     @Bean
     public CorsConfigurationSource corsConfigurationSource() {
         CorsConfiguration configuration = new CorsConfiguration();
-        configuration.setAllowedOrigins(Arrays.asList("https://www.solid-connect.net", "http://localhost:8080", "https://www.api.solid-connect.net", "http://localhost:3000"));
+        configuration.setAllowedOrigins(corsProperties.getAllowedOrigins());
         configuration.setAllowedMethods(Arrays.asList("GET", "POST", "PUT", "DELETE", "PATCH", "OPTIONS"));
         configuration.setAllowedHeaders(Arrays.asList("*"));
         configuration.setAllowCredentials(true);
@@ -51,7 +53,6 @@ public class SecurityConfiguration {
                                 "/file/profile/pre",
                                 "/auth/kakao", "/auth/sign-up", "/auth/reissue",
                                 "/university/detail/**", "/university/search/**", "/university/recommends",
-                                "/swagger-ui/**", "/v3/api-docs/**",
                                 "/actuator/**"
                         )
                         .permitAll()
