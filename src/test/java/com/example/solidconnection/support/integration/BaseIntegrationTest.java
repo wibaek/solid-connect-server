@@ -1,4 +1,4 @@
-package com.example.solidconnection.university.service;
+package com.example.solidconnection.support.integration;
 
 import com.example.solidconnection.entity.Country;
 import com.example.solidconnection.entity.Region;
@@ -13,21 +13,19 @@ import com.example.solidconnection.university.domain.UniversityInfoForApply;
 import com.example.solidconnection.university.repository.LanguageRequirementRepository;
 import com.example.solidconnection.university.repository.UniversityInfoForApplyRepository;
 import com.example.solidconnection.university.repository.UniversityRepository;
-import io.restassured.RestAssured;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.extension.ExtendWith;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Value;
-import org.springframework.boot.test.web.server.LocalServerPort;
 
 import java.util.HashSet;
 
 import static com.example.solidconnection.type.SemesterAvailableForDispatch.ONE_SEMESTER;
 import static com.example.solidconnection.type.TuitionFeeType.HOME_UNIVERSITY_PAYMENT;
 
-@ExtendWith(DatabaseClearExtension.class)
 @TestContainerSpringBootTest
-abstract class UniversityDataSetUpIntegrationTest {
+@ExtendWith(DatabaseClearExtension.class)
+public abstract class BaseIntegrationTest {
 
     public static Region 영미권;
     public static Region 유럽;
@@ -59,12 +57,6 @@ abstract class UniversityDataSetUpIntegrationTest {
     public static UniversityInfoForApply 린츠_카톨릭대학_지원_정보;
     public static UniversityInfoForApply 메이지대학_지원_정보;
 
-    @Value("${university.term}")
-    public String term;
-
-    @LocalServerPort
-    private int port;
-
     @Autowired
     private RegionRepository regionRepository;
 
@@ -80,20 +72,33 @@ abstract class UniversityDataSetUpIntegrationTest {
     @Autowired
     private LanguageRequirementRepository languageRequirementRepository;
 
-    @BeforeEach
-    public void setUpBasicData() {
-        RestAssured.port = port;
+    @Value("${university.term}")
+    public String term;
 
+    @BeforeEach
+    public void setUpBaseData() {
+        setUpRegions();
+        setUpCountries();
+        setUpUniversities();
+        setUpUniversityInfos();
+        setUpLanguageRequirements();
+    }
+
+    private void setUpRegions() {
         영미권 = regionRepository.save(new Region("AMERICAS", "영미권"));
         유럽 = regionRepository.save(new Region("EUROPE", "유럽"));
         아시아 = regionRepository.save(new Region("ASIA", "아시아"));
+    }
 
+    private void setUpCountries() {
         미국 = countryRepository.save(new Country("US", "미국", 영미권));
         캐나다 = countryRepository.save(new Country("CA", "캐나다", 영미권));
         덴마크 = countryRepository.save(new Country("DK", "덴마크", 유럽));
         오스트리아 = countryRepository.save(new Country("AT", "오스트리아", 유럽));
         일본 = countryRepository.save(new Country("JP", "일본", 아시아));
+    }
 
+    private void setUpUniversities() {
         영미권_미국_괌대학 = universityRepository.save(new University(
                 null, "괌대학", "University of Guam", "university_of_guam",
                 "https://www.uog.edu/admissions/international-students",
@@ -179,7 +184,9 @@ abstract class UniversityDataSetUpIntegrationTest {
                 "https://solid-connection.s3.ap-northeast-2.amazonaws.com/original/meiji_university/1.png",
                 null, 일본, 아시아
         ));
+    }
 
+    private void setUpUniversityInfos() {
         괌대학_A_지원_정보 = universityInfoForApplyRepository.save(new UniversityInfoForApply(
                 null, term, "괌대학(A형)", 1, HOME_UNIVERSITY_PAYMENT, ONE_SEMESTER,
                 "1", "detailsForLanguage", "gpaRequirement",
@@ -259,7 +266,9 @@ abstract class UniversityDataSetUpIntegrationTest {
                 "detailsForAccommodation", "detailsForEnglishCourse", "details",
                 new HashSet<>(), 아시아_일본_메이지대학
         ));
+    }
 
+    private void setUpLanguageRequirements() {
         saveLanguageTestRequirement(괌대학_A_지원_정보, LanguageTestType.TOEFL_IBT, "80");
         saveLanguageTestRequirement(괌대학_A_지원_정보, LanguageTestType.TOEIC, "800");
         saveLanguageTestRequirement(괌대학_B_지원_정보, LanguageTestType.TOEFL_IBT, "70");
@@ -275,7 +284,10 @@ abstract class UniversityDataSetUpIntegrationTest {
     }
 
     private void saveLanguageTestRequirement(
-            UniversityInfoForApply universityInfoForApply, LanguageTestType testType, String minScore) {
+            UniversityInfoForApply universityInfoForApply,
+            LanguageTestType testType,
+            String minScore
+    ) {
         LanguageRequirement languageRequirement = new LanguageRequirement(
                 null,
                 testType,

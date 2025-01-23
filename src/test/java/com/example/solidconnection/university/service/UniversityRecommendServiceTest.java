@@ -6,6 +6,7 @@ import com.example.solidconnection.repositories.InterestedCountyRepository;
 import com.example.solidconnection.repositories.InterestedRegionRepository;
 import com.example.solidconnection.siteuser.domain.SiteUser;
 import com.example.solidconnection.siteuser.repository.SiteUserRepository;
+import com.example.solidconnection.support.integration.BaseIntegrationTest;
 import com.example.solidconnection.type.Gender;
 import com.example.solidconnection.type.PreparationStatus;
 import com.example.solidconnection.type.Role;
@@ -22,7 +23,7 @@ import static com.example.solidconnection.university.service.UniversityRecommend
 import static org.assertj.core.api.Assertions.assertThat;
 
 @DisplayName("대학교 추천 서비스 테스트")
-class UniversityRecommendServiceTest extends UniversityDataSetUpIntegrationTest {
+class UniversityRecommendServiceTest extends BaseIntegrationTest {
 
     @Autowired
     private UniversityRecommendService universityRecommendService;

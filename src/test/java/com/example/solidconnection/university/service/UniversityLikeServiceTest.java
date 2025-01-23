@@ -4,6 +4,7 @@ import com.example.solidconnection.custom.exception.CustomException;
 import com.example.solidconnection.siteuser.domain.SiteUser;
 import com.example.solidconnection.siteuser.repository.LikedUniversityRepository;
 import com.example.solidconnection.siteuser.repository.SiteUserRepository;
+import com.example.solidconnection.support.integration.BaseIntegrationTest;
 import com.example.solidconnection.type.Gender;
 import com.example.solidconnection.type.PreparationStatus;
 import com.example.solidconnection.type.Role;
@@ -22,7 +23,7 @@ import static org.assertj.core.api.Assertions.assertThat;
 import static org.assertj.core.api.AssertionsForClassTypes.assertThatCode;
 
 @DisplayName("대학교 좋아요 서비스 테스트")
-class UniversityLikeServiceTest extends UniversityDataSetUpIntegrationTest {
+class UniversityLikeServiceTest extends BaseIntegrationTest {
 
     @Autowired
     private UniversityLikeService universityLikeService;
@@ -65,7 +66,7 @@ class UniversityLikeServiceTest extends UniversityDataSetUpIntegrationTest {
     }
 
     @Test
-    void 존재하지_않는_대학_좋아요_시도하면_예외를_반환한다() {
+    void 존재하지_않는_대학_좋아요_시도하면_예외_응답을_반환한다() {
         // given
         SiteUser testUser = createSiteUser();
         Long invalidUniversityId = 9999L;
@@ -102,7 +103,7 @@ class UniversityLikeServiceTest extends UniversityDataSetUpIntegrationTest {
     }
 
     @Test
-    void 존재하지_않는_대학의_좋아요_여부_조회시_예외를_반환한다() {
+    void 존재하지_않는_대학의_좋아요_여부를_조회하면_예외_응답을_반환한다() {
         // given
         SiteUser testUser = createSiteUser();
         Long invalidUniversityId = 9999L;

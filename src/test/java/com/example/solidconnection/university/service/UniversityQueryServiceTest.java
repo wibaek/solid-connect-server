@@ -1,6 +1,7 @@
 package com.example.solidconnection.university.service;
 
 import com.example.solidconnection.custom.exception.CustomException;
+import com.example.solidconnection.support.integration.BaseIntegrationTest;
 import com.example.solidconnection.type.LanguageTestType;
 import com.example.solidconnection.university.dto.UniversityDetailResponse;
 import com.example.solidconnection.university.dto.LanguageRequirementResponse;
@@ -23,7 +24,7 @@ import static org.mockito.BDDMockito.then;
 import static org.mockito.Mockito.times;
 
 @DisplayName("대학교 조회 서비스 테스트")
-class UniversityQueryServiceTest extends UniversityDataSetUpIntegrationTest {
+class UniversityQueryServiceTest extends BaseIntegrationTest {
 
     @Autowired
     private UniversityQueryService universityQueryService;
@@ -91,7 +92,7 @@ class UniversityQueryServiceTest extends UniversityDataSetUpIntegrationTest {
     }
 
     @Test
-    void 존재하지_않는_대학_상세정보_조회시_예외_응답을_반환한다() {
+    void 존재하지_않는_대학_상세정보를_조회하면_예외_응답을_반환한다() {
         // given
         Long invalidUniversityInfoForApplyId = 9999L;
 
