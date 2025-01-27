@@ -13,10 +13,8 @@ import org.springframework.web.filter.OncePerRequestFilter;
 
 import java.io.IOException;
 
-import static com.example.solidconnection.auth.domain.TokenType.REFRESH;
-import static com.example.solidconnection.auth.service.AuthService.SIGN_OUT_VALUE;
+import static com.example.solidconnection.auth.domain.TokenType.BLACKLIST;
 import static com.example.solidconnection.custom.exception.ErrorCode.USER_ALREADY_SIGN_OUT;
-import static com.example.solidconnection.util.JwtUtils.parseSubject;
 import static com.example.solidconnection.util.JwtUtils.parseTokenFromRequest;
 
 @Component
@@ -25,24 +23,20 @@ public class SignOutCheckFilter extends OncePerRequestFilter {
 
     private final RedisTemplate<String, String> redisTemplate;
     private final JwtProperties jwtProperties;
-    private final JwtAuthenticationEntryPoint jwtAuthenticationEntryPoint;
 
     @Override
     protected void doFilterInternal(@NonNull HttpServletRequest request,
                                     @NonNull HttpServletResponse response,
                                     @NonNull FilterChain filterChain) throws ServletException, IOException {
         String token = parseTokenFromRequest(request);
-        if (token == null || !isSignOut(token)) {
-            filterChain.doFilter(request, response);
-            return;
+        if (token != null && hasSignedOut(token)) {
+            throw new CustomException(USER_ALREADY_SIGN_OUT);
         }
-
-        jwtAuthenticationEntryPoint.customCommence(response, new CustomException(USER_ALREADY_SIGN_OUT));
+        filterChain.doFilter(request, response);
     }
 
-    private boolean isSignOut(String accessToken) {
-        String subject = parseSubject(accessToken, jwtProperties.secret());
-        String refreshToken = REFRESH.addPrefixToSubject(subject);
-        return SIGN_OUT_VALUE.equals(redisTemplate.opsForValue().get(refreshToken));
+    private boolean hasSignedOut(String accessToken) {
+        String blacklistKey = BLACKLIST.addPrefixToSubject(accessToken);
+        return redisTemplate.opsForValue().get(blacklistKey) != null;
     }
 }
