@@ -18,8 +18,8 @@ import org.springframework.http.HttpStatus;
 
 import java.time.LocalDate;
 
-import static com.example.solidconnection.auth.domain.TokenType.KAKAO_OAUTH;
 import static com.example.solidconnection.auth.domain.TokenType.REFRESH;
+import static com.example.solidconnection.auth.domain.TokenType.SIGN_UP;
 import static com.example.solidconnection.e2e.DynamicFixture.createKakaoUserInfoDtoByEmail;
 import static com.example.solidconnection.e2e.DynamicFixture.createSiteUserByEmail;
 import static com.example.solidconnection.scheduler.UserRemovalScheduler.ACCOUNT_RECOVER_DURATION;
@@ -65,7 +65,7 @@ class SignInTest extends BaseEndToEndTest {
                 () -> assertThat(response.nickname()).isEqualTo(kakaoProfileDto.nickname()),
                 () -> assertThat(response.profileImageUrl()).isEqualTo(kakaoProfileDto.profileImageUrl()),
                 () -> assertThat(response.kakaoOauthToken()).isNotNull());
-        assertThat(redisTemplate.opsForValue().get(KAKAO_OAUTH.addPrefixToSubject(email)))
+        assertThat(redisTemplate.opsForValue().get(SIGN_UP.addPrefix(email)))
                 .as("카카오 인증 토큰을 저장한다.")
                 .isEqualTo(response.kakaoOauthToken());
     }
@@ -95,7 +95,7 @@ class SignInTest extends BaseEndToEndTest {
                 () -> assertThat(response.isRegistered()).isTrue(),
                 () -> assertThat(response.accessToken()).isNotNull(),
                 () -> assertThat(response.refreshToken()).isNotNull());
-        assertThat(redisTemplate.opsForValue().get(REFRESH.addPrefixToSubject(siteUser.getId().toString())))
+        assertThat(redisTemplate.opsForValue().get(REFRESH.addPrefix(siteUser.getId().toString())))
                 .as("리프레시 토큰을 저장한다.")
                 .isEqualTo(response.refreshToken());
     }
@@ -130,7 +130,7 @@ class SignInTest extends BaseEndToEndTest {
                 () -> assertThat(response.accessToken()).isNotNull(),
                 () -> assertThat(response.refreshToken()).isNotNull(),
                 () -> assertThat(updatedSiteUser.getQuitedAt()).isNull());
-        assertThat(redisTemplate.opsForValue().get(REFRESH.addPrefixToSubject(siteUser.getId().toString())))
+        assertThat(redisTemplate.opsForValue().get(REFRESH.addPrefix(siteUser.getId().toString())))
                 .as("리프레시 토큰을 저장한다.")
                 .isEqualTo(response.refreshToken());
     }

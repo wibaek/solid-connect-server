@@ -7,8 +7,7 @@ import com.example.solidconnection.application.dto.ApplicantResponse;
 import com.example.solidconnection.application.dto.ApplicationsResponse;
 import com.example.solidconnection.application.dto.UniversityApplicantsResponse;
 import com.example.solidconnection.application.repository.ApplicationRepository;
-import com.example.solidconnection.auth.domain.TokenType;
-import com.example.solidconnection.auth.service.TokenProvider;
+import com.example.solidconnection.auth.service.AuthTokenProvider;
 import com.example.solidconnection.siteuser.domain.SiteUser;
 import com.example.solidconnection.siteuser.repository.SiteUserRepository;
 import com.example.solidconnection.type.VerifyStatus;
@@ -36,7 +35,7 @@ class ApplicantsQueryTest extends UniversityDataSetUpEndToEndTest {
     private ApplicationRepository applicationRepository;
 
     @Autowired
-    private TokenProvider tokenProvider;
+    private AuthTokenProvider authTokenProvider;
 
     private String accessToken;
     private String adminAccessToken;
@@ -65,17 +64,14 @@ class ApplicantsQueryTest extends UniversityDataSetUpEndToEndTest {
         SiteUser 사용자6 = siteUserRepository.save(createSiteUserByEmail("email6"));
 
         // setUp - 엑세스 토큰 생성과 리프레시 토큰 생성 및 저장
-        accessToken = tokenProvider.generateToken(나, TokenType.ACCESS);
-        String refreshToken = tokenProvider.generateToken(나, TokenType.REFRESH);
-        tokenProvider.saveToken(refreshToken, TokenType.REFRESH);
+        accessToken = authTokenProvider.generateAccessToken(나);
+        authTokenProvider.generateAndSaveRefreshToken(나);
 
-        adminAccessToken = tokenProvider.generateToken(사용자5_관리자, TokenType.ACCESS);
-        String adminRefreshToken = tokenProvider.generateToken(사용자5_관리자, TokenType.REFRESH);
-        tokenProvider.saveToken(adminRefreshToken, TokenType.REFRESH);
+        adminAccessToken = authTokenProvider.generateAccessToken(사용자5_관리자);
+        authTokenProvider.generateAndSaveRefreshToken(사용자5_관리자);
 
-        user6AccessToken = tokenProvider.generateToken(사용자6, TokenType.ACCESS);
-        String user6RefreshToken = tokenProvider.generateToken(사용자6, TokenType.REFRESH);
-        tokenProvider.saveToken(user6RefreshToken, TokenType.REFRESH);
+        user6AccessToken = authTokenProvider.generateAccessToken(사용자6);
+        authTokenProvider.generateAndSaveRefreshToken(사용자6);
 
         // setUp - 지원 정보 저장
         Gpa gpa = createDummyGpa();
