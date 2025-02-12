@@ -18,7 +18,7 @@ import static com.example.solidconnection.custom.exception.ErrorCode.AUTHENTICAT
 import static com.example.solidconnection.custom.exception.ErrorCode.INVALID_TOKEN;
 import static org.assertj.core.api.Assertions.assertThat;
 import static org.assertj.core.api.Assertions.assertThatCode;
-import static org.junit.jupiter.api.Assertions.*;
+import static org.junit.jupiter.api.Assertions.assertAll;
 
 @DisplayName("사용자 인증 정보 서비스 테스트")
 @TestContainerSpringBootTest

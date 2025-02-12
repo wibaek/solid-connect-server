@@ -1,6 +1,7 @@
 package com.example.solidconnection.custom.security.filter;
 
 import com.example.solidconnection.custom.exception.CustomException;
+import com.example.solidconnection.custom.exception.ErrorCode;
 import com.example.solidconnection.custom.response.ErrorResponse;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import jakarta.servlet.FilterChain;
@@ -9,12 +10,16 @@ import jakarta.servlet.http.HttpServletRequest;
 import jakarta.servlet.http.HttpServletResponse;
 import lombok.NonNull;
 import lombok.RequiredArgsConstructor;
+import org.springframework.security.access.AccessDeniedException;
+import org.springframework.security.authentication.AnonymousAuthenticationToken;
+import org.springframework.security.core.Authentication;
 import org.springframework.security.core.context.SecurityContextHolder;
 import org.springframework.stereotype.Component;
 import org.springframework.web.filter.OncePerRequestFilter;
 
 import java.io.IOException;
 
+import static com.example.solidconnection.custom.exception.ErrorCode.ACCESS_DENIED;
 import static com.example.solidconnection.custom.exception.ErrorCode.AUTHENTICATION_FAILED;
 
 @Component
@@ -31,25 +36,28 @@ public class ExceptionHandlerFilter extends OncePerRequestFilter {
             filterChain.doFilter(request, response);
         } catch (CustomException e) {
             customCommence(response, e);
+        } catch (AccessDeniedException e) {
+            Authentication auth = SecurityContextHolder.getContext().getAuthentication();
+            ErrorCode errorCode = auth instanceof AnonymousAuthenticationToken ? AUTHENTICATION_FAILED : ACCESS_DENIED;
+            generalCommence(response, e, errorCode);
         } catch (Exception e) {
-            generalCommence(response, e);
+            generalCommence(response, e, AUTHENTICATION_FAILED);
         }
     }
 
     public void customCommence(HttpServletResponse response, CustomException customException) throws IOException {
-        SecurityContextHolder.clearContext();
         ErrorResponse errorResponse = new ErrorResponse(customException);
-        writeResponse(response, errorResponse);
+        writeResponse(response, errorResponse, customException.getCode());
     }
 
-    public void generalCommence(HttpServletResponse response, Exception exception) throws IOException {
+    public void generalCommence(HttpServletResponse response, Exception exception, ErrorCode errorCode) throws IOException {
+        ErrorResponse errorResponse = new ErrorResponse(errorCode, exception.getMessage());
+        writeResponse(response, errorResponse, errorCode.getCode());
+    }
+
+    private void writeResponse(HttpServletResponse response, ErrorResponse errorResponse, int statusCode) throws IOException {
         SecurityContextHolder.clearContext();
-        ErrorResponse errorResponse = new ErrorResponse(AUTHENTICATION_FAILED, exception.getMessage());
-        writeResponse(response, errorResponse);
-    }
-
-    private void writeResponse(HttpServletResponse response, ErrorResponse errorResponse) throws IOException {
-        response.setStatus(HttpServletResponse.SC_UNAUTHORIZED);
+        response.setStatus(statusCode);
         response.setContentType("application/json");
         response.setCharacterEncoding("UTF-8");
         response.getWriter().write(objectMapper.writeValueAsString(errorResponse));
